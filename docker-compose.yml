@@ -1,0 +1,105 @@
+version: "3.9"
+
+services:
+  # ─── PostgreSQL 15 + pgvector + pgcrypto ───
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: vlubvi_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vlubvi
+      POSTGRES_USER: vlubvi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vlubvi -d vlubvi"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - vlubvi_net
+
+  # ─── PgBouncer (transaction mode) ───
+  pgbouncer:
+    image: edoburu/pgbouncer:1.21.0-p2
+    container_name: vlubvi_pgbouncer
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: "postgres://vlubvi:${POSTGRES_PASSWORD:-changeme}@postgres:5432/vlubvi"
+      POOL_MODE: transaction
+      DEFAULT_POOL_SIZE: 40
+      MAX_CLIENT_CONN: 200
+      MAX_DB_CONNECTIONS: 100
+      RESERVE_POOL_SIZE: 10
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_RESET_QUERY: "DISCARD ALL"
+      AUTH_TYPE: scram-sha-256
+    ports:
+      - "6432:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vlubvi_net
+
+  # ─── Redis 7 ───
+  redis:
+    image: redis:7-alpine
+    container_name: vlubvi_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 300
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - vlubvi_net
+
+  # ─── FastAPI Backend ───
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vlubvi_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://vlubvi:${POSTGRES_PASSWORD:-changeme}@pgbouncer:5432/vlubvi"
+      REDIS_URL: "redis://redis:6379/0"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - vlubvi_net
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  vlubvi_net:
+    driver: bridge
