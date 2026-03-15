@@ -8,7 +8,7 @@ Vlubvi — FastAPI Application Entry Point.
 - All routers mounted
 """
 
-from __future__ import annotations
+
 
 import logging
 import sys

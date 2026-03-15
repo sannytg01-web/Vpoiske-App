@@ -5,7 +5,7 @@ import { Diamond, CheckCircle } from "lucide-react";
 import { GlassCard } from "../components/ui/GlassCard";
 import { Button } from "../components/ui/Button";
 import { useAuthStore } from "../store/authStore";
-import { tgAlert } from "../utils/telegram";
+import { usePaymentStore } from "../store/paymentStore";
 
 const bottomSheetVariants = {
   hidden: { y: "100%", opacity: 0 },
@@ -31,45 +31,49 @@ export const Paywall: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // @ts-ignore
-      if (window.Telegram?.WebApp?.HapticFeedback) {
-        // @ts-ignore
-        window.Telegram.WebApp.HapticFeedback.impactOccurred("medium");
+      if ((window as any).Telegram?.WebApp?.HapticFeedback) {
+        (window as any).Telegram.WebApp.HapticFeedback.impactOccurred("medium");
       }
 
-      tgAlert(
-        "Тестовый режим: система автоматически 'одобрит' оплату через несколько секунд.",
-      );
+      const { payment_url, order_id } = await usePaymentStore.getState().subscribe();
+      
+      if ((window as any).Telegram?.WebApp?.openLink) {
+        (window as any).Telegram.WebApp.openLink(payment_url);
+      } else {
+        window.open(payment_url, '_blank');
+      }
 
-      // Polling mock
+      // Polling for status
       let attempts = 0;
       const poll = setInterval(async () => {
         attempts++;
         if (attempts > 150) {
           clearInterval(poll);
-          setError("Оплата не подтверждена");
+          setError("Оплата не подтверждена за отведенное время");
           setLoading(false);
           return;
         }
 
-        // mock successful payment after 4 seconds
-        if (attempts > 2) {
-          clearInterval(poll);
-          // @ts-ignore
-          if (window.Telegram?.WebApp?.HapticFeedback) {
-            // @ts-ignore
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred(
-              "success",
-            );
-          }
-          const newUntilDate = new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000,
-          ).toISOString();
-          setPremium(true, newUntilDate);
-          navigate(-1);
+        try {
+            const statusRes = await usePaymentStore.getState().checkStatus(order_id);
+            if (statusRes.is_premium) {
+                clearInterval(poll);
+                if ((window as any).Telegram?.WebApp?.HapticFeedback) {
+                    (window as any).Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+                }
+                setPremium(true, statusRes.premium_until || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
+                navigate(-1);
+            } else if (statusRes.status === 'failed') {
+                clearInterval(poll);
+                setError("Ошибка оплаты");
+                setLoading(false);
+            }
+        } catch (e) {
+             // Ignoring temporary fetch errors during polling
         }
-      }, 2000);
+      }, 5000); // Check every 5s
     } catch (e) {
+      console.error(e);
       setError("Ошибка сети. Попробуйте снова.");
       setLoading(false);
     }

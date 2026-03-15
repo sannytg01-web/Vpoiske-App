@@ -256,23 +256,25 @@ const PhoneAuthModal: React.FC<{isOpen: boolean, onClose: () => void, onSuccess:
   const handleSendCode = async () => {
     if (phone.length < 12) return;
     try {
-      // Mocked server request for UI testing
-      console.log(`[MOCK] Sending code to ${phone}... (enter any code)`);
-      await new Promise(r => setTimeout(r, 500));
+      await apiClient.post('/auth/phone/send-code', { phone });
       setStep(2);
-    } catch(e) { console.error(e); }
+    } catch(e) { 
+      console.error('Failed to send code:', e); 
+      alert('Ошибка при отправке кода. Проверьте номер.');
+    }
   };
 
   const handleVerify = async (fullCode: string) => {
     try {
-      // Mocked server verification for UI testing
-      console.log(`[MOCK] Verifying code ${fullCode}...`);
-      await new Promise(r => setTimeout(r, 500));
-      localStorage.setItem('access_token', 'mock_access_token');
-      localStorage.setItem('refresh_token', 'mock_refresh_token');
+      const res = await apiClient.post('/auth/phone', { phone, code: fullCode });
+      localStorage.setItem('access_token', res.data.access_token);
+      localStorage.setItem('refresh_token', res.data.refresh_token);
       useAuthStore.getState().setAuthenticated("phone_user");
       onSuccess();
-    } catch(e) { console.error(e); }
+    } catch(e) { 
+        console.error('Failed to verify code:', e); 
+        alert('Неверный код');
+    }
   };
 
   const handleCodeChange = (idx: number, val: string) => {

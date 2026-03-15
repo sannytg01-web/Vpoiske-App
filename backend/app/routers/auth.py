@@ -10,7 +10,6 @@ Endpoints:
   POST /auth/logout        — Invalidate refresh_token
 """
 
-from __future__ import annotations
 
 import secrets
 import uuid

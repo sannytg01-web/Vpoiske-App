@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-8.2.2, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: asyncio-0.23.7, anyio-4.12.1
+asyncio: mode=Mode.AUTO
+collected 18 items
+
+tests/test_auth.py ......                                                [ 33%]
+tests/test_hd_calculator.py ....                                         [ 55%]
+tests/test_matching.py ......                                            [ 88%]
+tests/test_payment.py ..                                                 [100%]
+
+============================= 18 passed in 14.83s ==============================

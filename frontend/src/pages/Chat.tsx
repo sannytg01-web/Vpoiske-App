@@ -6,6 +6,8 @@ import { ChevronLeft, Send, Mic, MicOff } from "lucide-react";
 import { AppBackground } from "../components/ui/AppBackground";
 import { useChatStore } from "../store/chatStore";
 import { useMatchStore } from "../store/matchStore";
+import { useAuthStore } from "../store/authStore";
+import { apiClient } from "../utils/apiClient";
 
 export const Chat: React.FC = () => {
   const { matchId } = useParams<{ matchId: string }>();
@@ -20,8 +22,7 @@ export const Chat: React.FC = () => {
     loading,
   } = useChatStore();
   const { selectedMatch, selectMatch } = useMatchStore();
-  // Assuming mocked authenticated logic where user_id is 1
-  const currentUserMockId = 1;
+  const userId = useAuthStore((state) => state.userId) || "mock_id"; // Now reads from authStore
 
   const [inputText, setInputText] = useState("");
 
@@ -89,8 +90,16 @@ export const Chat: React.FC = () => {
     let reconnectTimeout: ReturnType<typeof setTimeout>;
 
     const connect = () => {
-      // Usually take true token, using test_token for mock
-      const wsUrl = `ws://localhost:8000/chat/ws/${matchId}?token=test_token`;
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        console.error("No token found. Cannot connect to websocket.");
+        return;
+      }
+      const baseUrl = apiClient.defaults.baseURL || 'http://localhost:8000';
+      const wsProtocol = baseUrl.startsWith('https') ? 'wss:' : 'ws:';
+      const wsHost = baseUrl.replace(/^https?:/, '');
+      const wsUrl = `${wsProtocol}${wsHost}/chat/ws/${matchId}?token=${token}`;
+      
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
@@ -166,10 +175,9 @@ export const Chat: React.FC = () => {
 
   const handleSend = () => {
     if (!inputText.trim()) return;
-
     const payload = {
       id: Date.now().toString(),
-      sender_id: currentUserMockId,
+      sender_id: userId as any,
       content: inputText.trim(),
       created_at: new Date().toISOString(),
       read_at: null,
@@ -286,7 +294,7 @@ export const Chat: React.FC = () => {
 
         <AnimatePresence>
           {messages.map((msg, idx) => {
-            const isMe = msg.sender_id === currentUserMockId;
+            const isMe = String(msg.sender_id) === String(userId);
             return (
               <motion.div
                 key={msg.id || idx}

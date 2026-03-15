@@ -1,52 +1,76 @@
-from datetime import datetime, timedelta
 import uuid
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException, Query
+from datetime import datetime, timezone
+import structlog
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException, Query, status
+from sqlalchemy import select, or_, and_
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.ws_manager import manager
 from app.services.notifications import send_push
 from app.core.deps import get_current_user
-from app.models.models import User
+from app.core.security import decode_token
+from app.database import get_db, async_session_factory
+from app.models.models import User, Message, Match
+from app.services.encryption import encrypt, decrypt
 
+logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/chat", tags=["chat"])
-
-# Mock DB for Chat History (in memory list of dicts for now)
-# Schema: {"id": str, "match_id": str, "sender_id": int, "content": str, "created_at": datetime, "read_at": datetime}
-DB_MESSAGES = []
 
 @router.get("/{match_id}/messages")
 async def get_messages(
     match_id: str,
     before: str = None,
     limit: int = 50,
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Get paginated chat history for a match.
-    In real app: Queries DB, decrypts messages (`content_encrypted`), limits by cursor
+    Queries DB, decrypts messages (`content_encrypted`), limits by cursor.
     """
-    history = [m for m in DB_MESSAGES if m["match_id"] == match_id]
+    try:
+        match_uuid = uuid.UUID(match_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid match_id format")
+
+    # Verify user is in this match
+    stmt_match = select(Match).where(
+        Match.id == match_uuid,
+        or_(Match.user_a == user.id, Match.user_b == user.id)
+    )
+    res_match = await db.execute(stmt_match)
+    match = res_match.scalar_one_or_none()
     
-    # Sort old to new (as they happened)
-    history.sort(key=lambda x: x["created_at"])
+    if not match:
+        raise HTTPException(status_code=403, detail="Not authorized for this match")
+
+    stmt = select(Message).where(Message.match_id == match_uuid).order_by(Message.created_at.desc())
     
-    # Very simple cursor pagination simulation based on slicing
     if before:
         try:
-             idx = next(i for i, v in enumerate(history) if v["id"] == before)
-             history = history[:idx]
-        except StopIteration:
-             pass
-             
-    # Return last `limit` amount of items
-    result = history[-limit:]
+            before_uuid = uuid.UUID(before)
+            # Find the date of the 'before' message or use cursor pagination based on date
+            stmt_before = select(Message.created_at).where(Message.id == before_uuid)
+            before_date = await db.scalar(stmt_before)
+            if before_date:
+                stmt = stmt.where(Message.created_at < before_date)
+        except ValueError:
+            pass
+
+    stmt = stmt.limit(limit)
+    res_messages = await db.execute(stmt)
+    messages = res_messages.scalars().all()
     
-    # Formatting for JSON serialization
+    # Sort reverse to get chronological
+    messages = list(reversed(messages))
+
     return [{
-        "id": m["id"],
-        "sender_id": m["sender_id"],
-        "content": m["content"], # Decrypted content here
-        "created_at": m["created_at"].isoformat(),
-        "read_at": m["read_at"].isoformat() if m["read_at"] else None
-    } for m in result]
+        "id": str(m.id),
+        "sender_id": str(m.sender_id),
+        "content": decrypt(m.content_encrypted), 
+        "created_at": m.created_at.isoformat() if m.created_at else None,
+        "read_at": m.read_at.isoformat() if m.read_at else None
+    } for m in messages]
 
 @router.websocket("/ws/{match_id}")
 async def websocket_endpoint(
@@ -54,16 +78,42 @@ async def websocket_endpoint(
     match_id: str, 
     token: str = Query(...)
 ):
-    # Dummy authentication logic for WS based on ?token query parameter
-    # Normally we decode JWT from `token` parameter and find current user ID
     if not token:
-        await websocket.close(code=1008)
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
         
-    # Assume authenticated user_id = 1 for the scope of the prototype
-    user_id = 1 
+    try:
+        payload = decode_token(token)
+        user_id_str = payload.get("sub")
+        if not user_id_str:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+        user_id = uuid.UUID(user_id_str)
+        match_uuid = uuid.UUID(match_id)
+    except Exception as e:
+        logger.warning("ws_auth_failed", error=str(e))
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
     
-    await manager.connect(websocket, match_id, user_id)
+    # Check if user is in this match (using a short-lived session)
+    async with async_session_factory() as db:
+        stmt_match = select(Match).where(
+            Match.id == match_uuid,
+            or_(Match.user_a == user_id, Match.user_b == user_id)
+        )
+        match = await db.scalar(stmt_match)
+        if not match:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+
+        partner_id = match.user_b if match.user_a == user_id else match.user_a
+        
+        # Get partner user details for push notifications later
+        stmt_partner = select(User).where(User.id == partner_id)
+        partner = await db.scalar(stmt_partner)
+        partner_tg_id = partner.telegram_id if partner else None
+
+    await manager.connect(websocket, match_id, str(user_id))
     
     # Send welcome connected packet
     await websocket.send_json({"type": "connected", "match_id": match_id})
@@ -77,44 +127,62 @@ async def websocket_endpoint(
                 if not content:
                     continue
                     
-                # 1. Encrypt message (stub)
-                encrypted = f"ENC[{content}]" 
+                # 1. Encrypt message
+                encrypted_content = encrypt(content)
+                now = datetime.now(timezone.utc)
+                new_msg_id = uuid.uuid4()
                 
-                # 2. Save to DB
-                new_msg = {
-                    "id": str(uuid.uuid4()),
-                    "match_id": match_id,
-                    "sender_id": user_id,
-                    "content": content, # Unencrypted for local mock echo
-                    "created_at": datetime.utcnow(),
-                    "read_at": None
-                }
-                DB_MESSAGES.append(new_msg)
+                # 2. Save to DB directly
+                async with async_session_factory() as db:
+                    new_msg = Message(
+                        id=new_msg_id,
+                        match_id=match_uuid,
+                        sender_id=user_id,
+                        content_encrypted=encrypted_content,
+                        created_at=now,
+                        read_at=None
+                    )
+                    db.add(new_msg)
+                    await db.commit()
                 
                 # 3. Broadcast to all sockets listening to this match
-                # Also include sender_id so frontend knows whose bubble is it
+                # Important: Include sender_id for UI logic
                 broadcast_packet = {
                     "type": "message",
-                    "id": new_msg["id"],
-                    "sender_id": user_id,
+                    "id": str(new_msg_id),
+                    "sender_id": str(user_id),
                     "content": content,
-                    "created_at": new_msg["created_at"].isoformat()
+                    "created_at": now.isoformat()
                 }
                 await manager.broadcast(match_id, broadcast_packet)
                 
-                # 4. Notify offline partner via Telegram
-                # Normally look up partner's push_token or tg_id by cross checking DB Match table
-                partner_tg_id = "12345678"
-                await send_push(partner_tg_id, "Новое сообщение", "Вам написали в чат!")
+                # 4. Notify offline partner via Telegram (mock or real push)
+                if partner_tg_id:
+                    await send_push(str(partner_tg_id), "Новое сообщение", "Вам написали в чат!")
                 
             elif data.get("type") == "read":
-                 # Update read_at for messages up to specific ID or just all past
-                 for m in DB_MESSAGES:
-                     if m["match_id"] == match_id and m["sender_id"] != user_id and not m["read_at"]:
-                         m["read_at"] = datetime.utcnow()
-                         
-                 # Can optionally broadcast read receipt!
-                 await manager.broadcast(match_id, {"type": "read_receipt"})
+                 # Update read_at for unread messages sent by the partner
+                 async with async_session_factory() as db:
+                     # Raw update could be faster, but ORM works
+                     stmt_unread = select(Message).where(
+                         Message.match_id == match_uuid,
+                         Message.sender_id == partner_id,
+                         Message.read_at.is_(None)
+                     )
+                     unread_msgs = await db.scalars(stmt_unread)
+                     now = datetime.now(timezone.utc)
+                     updated_something = False
+                     for msg in unread_msgs:
+                         msg.read_at = now
+                         updated_something = True
+                     
+                     if updated_something:
+                         await db.commit()
+                         # Broadcast read receipt to partner
+                         await manager.broadcast(match_id, {"type": "read_receipt"})
                  
     except WebSocketDisconnect:
+        manager.disconnect(websocket, match_id)
+    except Exception as e:
+        logger.error("ws_error", error=str(e), exc_info=True)
         manager.disconnect(websocket, match_id)

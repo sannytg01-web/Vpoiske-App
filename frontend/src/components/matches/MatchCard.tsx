@@ -24,6 +24,8 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   onClick,
   delayIndex = 0
 }) => {
+  const hasPhoto = !!photoUrl && photoUrl.trim() !== "";
+
   return (
     <motion.div 
       variants={cardVariants}
@@ -39,16 +41,29 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         boxShadow: 'var(--shadow-card)',
       }}
     >
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${photoUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          height: '70%', // Photo takes top 70%
-        }}
-      />
+      {/* Background Image or Placeholder */}
+      {hasPhoto ? (
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${photoUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            height: '100%',
+          }}
+        />
+      ) : (
+        <div 
+          className="absolute inset-0 w-full h-full flex flex-col justify-center items-center pointer-events-none"
+          style={{
+            background: 'linear-gradient(135deg, #1c3d33 0%, #0d1f1a 100%)',
+          }}
+        >
+          <span className="text-[72px] font-thin text-white/10 uppercase" style={{ fontFamily: "Inter", transform: "translateY(-10px)" }}>
+            {name.charAt(0)}
+          </span>
+        </div>
+      )}
 
       {/* Gradient Overlay bottom to top */}
       <div 
@@ -94,9 +109,8 @@ export const MatchCard: React.FC<MatchCardProps> = ({
       )}
 
       {/* Content Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 pb-5 flex flex-col">
-        <h2 className="text-h2 text-white m-0 mb-1">{name}, {age}</h2>
-        {/* Additional info can go here */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 pb-5 flex flex-col z-20">
+        <h2 className="text-[17px] font-semibold tracking-wide text-white m-0 drop-shadow-md">{name}, {age}</h2>
       </div>
     </motion.div>
   );

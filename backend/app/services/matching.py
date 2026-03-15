@@ -128,7 +128,109 @@ def calculate_score(hd_a: dict, psych_a: dict, hd_b: dict, psych_b: dict) -> dic
         }
     }
 
-def find_matches_for_profile_mock(user_id: int):
-    # This is a stub for the Celery task logic
-    # In a real app this uses PGVector to query `psychological_profile` and calculates scores.
-    pass
+import uuid
+import random
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_, or_, desc
+from app.models.models import User, PsychologicalProfile, HdCard, Match
+
+def get_dummy_vector():
+    # 384-dimensional vector like all-MiniLM-L6-v2
+    return [random.gauss(0, 1) for _ in range(384)]
+
+async def run_matching_for_user(user_id: uuid.UUID, db: AsyncSession):
+    # 1. Fetch user's psych profile and hd card
+    stmt_p = select(PsychologicalProfile).where(PsychologicalProfile.user_id == user_id)
+    user_psych = await db.scalar(stmt_p)
+    
+    stmt_h = select(HdCard).where(HdCard.user_id == user_id)
+    user_hd = await db.scalar(stmt_h)
+
+    # 1.1 Mocks if not exist for testing purposes
+    if not user_psych:
+        user_psych = PsychologicalProfile(user_id=user_id, top_values=["Свобода", "Развитие"], embedding=get_dummy_vector())
+        db.add(user_psych)
+        await db.flush()
+    if not user_psych.embedding:
+        user_psych.embedding = get_dummy_vector()
+        await db.flush()
+        
+    if not user_hd:
+        user_hd = HdCard(user_id=user_id, type="Генератор", active_gates=[], active_channels=[])
+        db.add(user_hd)
+        await db.flush()
+
+    # 2. PGVector Query: Find top 10 closest psychological profiles 
+    # using L2 distance or Cosine distance (<=> is cosine distance in pgvector)
+    stmt_others = select(PsychologicalProfile).where(
+        PsychologicalProfile.user_id != user_id,
+        PsychologicalProfile.embedding.is_not(None)
+    ).order_by(
+        PsychologicalProfile.embedding.cosine_distance(user_psych.embedding)
+    ).limit(10)
+    
+    closest_profiles = await db.scalars(stmt_others)
+    
+    # 3. For each closest profile, calculate detailed score and create Match
+    for other_psych in closest_profiles:
+        # Check if match already exists
+        stmt_exists = select(Match).where(
+            or_(
+                and_(Match.user_a == user_id, Match.user_b == other_psych.user_id),
+                and_(Match.user_a == other_psych.user_id, Match.user_b == user_id)
+            )
+        )
+        existing = await db.scalar(stmt_exists)
+        if existing:
+            continue
+            
+        # Get their HD Card
+        stmt_other_h = select(HdCard).where(HdCard.user_id == other_psych.user_id)
+        other_hd = await db.scalar(stmt_other_h)
+        
+        # Mocks if not exist
+        if not other_hd:
+            other_hd = HdCard(user_id=other_psych.user_id, type="Проектор", active_gates=[], active_channels=[])
+            db.add(other_hd)
+            await db.flush()
+
+        # Build dict arguments for calculate_score
+        dict_hd_a = {"type": user_hd.type, "active_gates": user_hd.active_gates or [], "active_channels": user_hd.active_channels or []}
+        dict_psych_a = {
+            "attachment_style": user_psych.attachment_style or "secure", 
+            "ocean": {
+                "neuroticism": user_psych.neuroticism or 0.5,
+                "extraversion": user_psych.extraversion or 0.5
+            },
+            "conflict_resolution": user_psych.conflict_style or "healthy_boundary",
+            "top_values": user_psych.top_values or []
+        }
+        
+        dict_hd_b = {"type": other_hd.type, "active_gates": other_hd.active_gates or [], "active_channels": other_hd.active_channels or []}
+        dict_psych_b = {
+            "attachment_style": other_psych.attachment_style or "secure", 
+            "ocean": {
+                "neuroticism": other_psych.neuroticism or 0.5,
+                "extraversion": other_psych.extraversion or 0.5
+            },
+            "conflict_resolution": other_psych.conflict_style or "healthy_boundary",
+            "top_values": other_psych.top_values or []
+        }
+
+        # Calculate semantic-hd combined score!
+        score_data = calculate_score(dict_hd_a, dict_psych_a, dict_hd_b, dict_psych_b)
+        
+        # Insert Match
+        new_match = Match(
+            user_a=user_id,
+            user_b=other_psych.user_id,
+            compatibility_score=score_data["score"],
+            hd_score=score_data["hd_score"],
+            psychology_score=score_data["psychology_score"],
+            values_score=score_data["values_score"],
+            breakdown=score_data["details"],
+            status="pending"
+        )
+        db.add(new_match)
+        
+    await db.commit()

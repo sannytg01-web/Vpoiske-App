@@ -6,7 +6,7 @@ Vlubvi — Fernet AES field-level encryption + phone hashing.
 - hash_phone(phone: str) → str  (SHA-256, deterministic for lookups)
 """
 
-from __future__ import annotations
+
 
 import hashlib
 

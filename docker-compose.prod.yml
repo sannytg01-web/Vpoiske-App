@@ -52,7 +52,7 @@ services:
 
   celery_beat:
     build: ./backend
-    command: celery -A celery_worker beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A app.core.celery_app beat --loglevel=info
     environment: *backend_env
     restart: unless-stopped
 

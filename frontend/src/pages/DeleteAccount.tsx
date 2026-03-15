@@ -10,6 +10,7 @@ import { TextInput } from '../components/ui/TextInput';
 import { pageTransition } from '../utils/animations';
 import { tgAlert } from '../utils/telegram';
 import { useAuthStore } from '../store/authStore';
+import { apiClient } from '../api/client';
 
 export const DeleteAccount: React.FC = () => {
   const navigate = useNavigate();
@@ -19,16 +20,20 @@ export const DeleteAccount: React.FC = () => {
 
   const REQUIRED_PHRASE = 'УДАЛИТЬ';
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (confirmationPhrase !== REQUIRED_PHRASE) return;
     
     setIsDeleting(true);
-    // Имитация задержки перед удалением (в реальном приложении — запрос к API)
-    setTimeout(() => {
+    try {
+      await apiClient.post('/gdpr/delete');
       logout();
       tgAlert('Ваш аккаунт и все связанные персональные данные были безвозвратно удалены.');
       navigate('/onboarding', { replace: true });
-    }, 1500);
+    } catch (e) {
+      console.error(e);
+      tgAlert('Ошибка при удалении аккаунта');
+      setIsDeleting(false);
+    }
   };
 
   return (

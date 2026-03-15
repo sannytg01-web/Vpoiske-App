@@ -34,10 +34,18 @@ export const HDChart: React.FC<HDChartProps> = ({ definedCenters, activeChannels
 
   const getPathForShape = (cx: number, cy: number, type: string, size = 12) => {
     switch (type) {
-      case 'triangle-up':
-        return `M ${cx} ${cy - size} L ${cx + size} ${cy + size} L ${cx - size} ${cy + size} Z`;
-      case 'triangle-down':
-        return `M ${cx - size} ${cy - size} L ${cx + size} ${cy - size} L ${cx} ${cy + size} Z`;
+      case 'triangle-up': {
+        const h = size * 2;
+        const R = h * (2/3); // Distance to top point
+        const r = h * (1/3); // Distance to base
+        return `M ${cx} ${cy - R} L ${cx + size * 1.15} ${cy + r} L ${cx - size * 1.15} ${cy + r} Z`;
+      }
+      case 'triangle-down': {
+        const h = size * 2;
+        const R = h * (2/3); // Distance to bottom point
+        const r = h * (1/3); // Distance to top base
+        return `M ${cx - size * 1.15} ${cy - r} L ${cx + size * 1.15} ${cy - r} L ${cx} ${cy + R} Z`;
+      }
       case 'diamond':
         return `M ${cx} ${cy - size} L ${cx + size} ${cy} L ${cx} ${cy + size} L ${cx - size} ${cy} Z`;
       case 'square':

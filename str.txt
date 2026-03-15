@@ -1,0 +1,244 @@
+﻿docker : time="2026-03-15T17:1
+5:11+03:00" level=warning msg=
+"D:\\Vpoiske App\\docker-compo
+se.yml: the attribute `version
+` is obsolete, it will be igno
+red, please remove it to avoid
+ potential confusion"
+строка:1 знак:1
++ docker compose exec backend 
+bash -c "python -c 'from app.m
+ain import  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (time="202  
+  6-03-1...tial confusion":   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+Traceback (most recent call la
+st):
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/typ
+e_adapter.py", line 210, in __
+init__
+    core_schema = _getattr_no_
+parents(type, '__pydantic_core
+_schema__')
+                  ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/typ
+e_adapter.py", line 98, in _ge
+tattr_no_parents
+    raise AttributeError(attri
+bute)
+AttributeError: __pydantic_cor
+e_schema__
+
+During handling of the above e
+xception, another exception oc
+curred:
+
+Traceback (most recent call la
+st):
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_generate_schema.py", l
+ine 691, in _resolve_forward_r
+ef
+    obj = _typing_extra.eval_t
+ype_backport(obj, globalns=sel
+f._types_namespace)
+          ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_typing_extra.py", line
+ 254, in eval_type_backport
+    return typing._eval_type( 
+ # type: ignore
+           ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/typing.py", line 395, in _
+eval_type
+    return t._evaluate(globaln
+s, localns, recursive_guard)
+           ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/typing.py", line 905, in _
+evaluate
+    eval(self.__forward_code__
+, globalns, localns),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 1, in 
+<module>
+NameError: name 'TelegramAuthR
+equest' is not defined
+
+The above exception was the di
+rect cause of the following ex
+ception:
+
+Traceback (most recent call la
+st):
+  File "<string>", line 1, in 
+<module>
+  File "/app/app/main.py", lin
+e 27, in <module>
+    from app.routers import au
+th, consent, interview, geo, b
+irth_data, matches, chat, paym
+ent, profile, gdpr, bot
+  File "/app/app/routers/auth.
+py", line 120, in <module>
+    @router.post("/telegram", 
+response_model=TokenResponse)
+     ^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/fastapi/rout
+ing.py", line 944, in decorato
+r
+    self.add_api_route(
+  File "/usr/local/lib/python3
+.11/site-packages/fastapi/rout
+ing.py", line 883, in add_api_
+route
+    route = route_class(
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/fastapi/rout
+ing.py", line 513, in __init__
+    self.dependant = get_depen
+dant(path=self.path_format, ca
+ll=self.endpoint)
+                     ^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/fastapi/depe
+ndencies/utils.py", line 261, 
+in get_dependant
+    type_annotation, depends, 
+param_field = analyze_param(
+                              
+              ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/fastapi/depe
+ndencies/utils.py", line 444, 
+in analyze_param
+    field = create_response_fi
+eld(
+            ^^^^^^^^^^^^^^^^^^
+^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/fastapi/util
+s.py", line 99, in create_resp
+onse_field
+    return ModelField(**kwargs
+)  # type: ignore[arg-type]
+           ^^^^^^^^^^^^^^^^^^^
+^
+  File "<string>", line 6, in 
+__init__
+  File "/usr/local/lib/python3
+.11/site-packages/fastapi/_com
+pat.py", line 109, in __post_i
+nit__
+    self._type_adapter: TypeAd
+apter[Any] = TypeAdapter(
+                              
+             ^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/typ
+e_adapter.py", line 212, in __
+init__
+    core_schema = _get_schema(
+type, config_wrapper, parent_d
+epth=_parent_depth + 1)
+                  ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/typ
+e_adapter.py", line 81, in _ge
+t_schema
+    schema = gen.generate_sche
+ma(type_)
+             ^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_generate_schema.py", l
+ine 502, in generate_schema
+    schema = self._generate_sc
+hema_inner(obj)
+             ^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_generate_schema.py", l
+ine 737, in _generate_schema_i
+nner
+    return self._annotated_sch
+ema(obj)
+           ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_generate_schema.py", l
+ine 1753, in _annotated_schema
+    source_type, *annotations 
+= self._get_args_resolving_for
+ward_refs(
+                              
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_generate_schema.py", l
+ine 715, in _get_args_resolvin
+g_forward_refs
+    args = tuple([self._resolv
+e_forward_ref(a) if isinstance
+(a, ForwardRef) else a for a i
+n args])
+                 ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_generate_schema.py", l
+ine 715, in <listcomp>
+    args = tuple([self._resolv
+e_forward_ref(a) if isinstance
+(a, ForwardRef) else a for a i
+n args])
+                  ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3
+.11/site-packages/pydantic/_in
+ternal/_generate_schema.py", l
+ine 693, in _resolve_forward_r
+ef
+    raise PydanticUndefinedAnn
+otation.from_name_error(e) fro
+m e
+pydantic.errors.PydanticUndefi
+nedAnnotation: name 'TelegramA
+uthRequest' is not defined
+
+For further information visit 
+https://errors.pydantic.dev/2.
+7/u/undefined-annotation

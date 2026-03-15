@@ -1,88 +1,124 @@
 import uuid
-from datetime import datetime, timedelta
-from fastapi import APIRouter, HTTPException, Request
+import structlog
+from datetime import datetime, timedelta, timezone
+from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
+from app.database import get_db
+from app.models.models import Payment, User
+from app.core.deps import get_current_user
 from app.services.tbank import create_payment, verify_webhook
 
-router = APIRouter(prefix="/payment", tags=["payment"])
+logger = structlog.get_logger(__name__)
 
-# Mock In-memory BD для платежей и юзеров на время прототипа
-PAYMENTS_DB = {}
-USERS_DB = {}
+router = APIRouter(prefix="/payment", tags=["payment"])
 
 class SubscribeResponse(BaseModel):
     payment_url: str
     order_id: str
 
 @router.post("/subscribe", response_model=SubscribeResponse)
-async def subscribe_premium():
-    # Хардкод user_id=1, пока нет JWT на реальном бэкенде
-    user_id = 1
-    order_id = str(uuid.uuid4())
+async def subscribe_premium(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    order_id_uuid = uuid.uuid4()
+    order_id = str(order_id_uuid)
+    amount_kopecks = 49000  # 490 RUB
     
-    # 490 руб = 49000 копеек
-    payment_url = await create_payment(user_id, amount_kopecks=49000, order_id=order_id)
+    # Store payment in db as 'pending'
+    new_payment = Payment(
+        id=order_id_uuid,
+        user_id=user.id,
+        amount=amount_kopecks,
+        status="pending"
+    )
+    db.add(new_payment)
+    await db.commit()
+    await db.refresh(new_payment)
     
-    # Сохранить payments запись со status='pending'
-    PAYMENTS_DB[order_id] = {
-        "status": "pending",
-        "user_id": user_id
-    }
+    # Fetch real url or dummy based on service mode
+    payment_url = await create_payment(str(user.id), amount_kopecks=amount_kopecks, order_id=order_id)
     
-    # Вернуть {payment_url: str, order_id: str}
     return SubscribeResponse(payment_url=payment_url, order_id=order_id)
 
 @router.post("/webhook")
-async def tbank_webhook(request: Request):
-    """(публичный, без JWT!)"""
+async def tbank_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    """(public, no JWT for TBank calling us)"""
     data = await request.json()
     
-    # СНАЧАЛА verify_webhook(data) → если False → вернуть 400
+    # verify_webhook ensures TBank sent it
     if not verify_webhook(data):
         raise HTTPException(status_code=400, detail="Invalid signature")
         
     order_id = data.get("OrderId")
     status = data.get("Status")
+    rebill_id = data.get("RebillId")
+    payment_id_tbank = str(data.get("PaymentId"))
     
-    if order_id in PAYMENTS_DB:
-        user_id = PAYMENTS_DB[order_id]["user_id"]
+    if not order_id:
+        return {"Success": True} # Just ignoring malformed validly-signed payloads
         
+    # Get payment record
+    try:
+        order_uuid = uuid.UUID(order_id)
+    except ValueError:
+        return {"Success": True}
+        
+    stmt = select(Payment).where(Payment.id == order_uuid)
+    payment = await db.scalar(stmt)
+    
+    if payment:
+        payment.tbank_payment_id = payment_id_tbank
+        if rebill_id:
+            payment.rebill_id = str(rebill_id)
+            
         if status == "CONFIRMED":
-            # При Status=CONFIRMED
-            PAYMENTS_DB[order_id]["status"] = "confirmed"
-            PAYMENTS_DB[order_id]["rebill_id"] = data.get("RebillId")
+            payment.status = "confirmed"
+            # Give user premium access
+            stmt_u = select(User).where(User.id == payment.user_id)
+            user = await db.scalar(stmt_u)
+            if user:
+                user.is_premium = True
+                # Give 30 days
+                now_utc = datetime.now(timezone.utc)
+                if user.premium_until and user.premium_until > now_utc:
+                    user.premium_until = user.premium_until + timedelta(days=30)
+                else:
+                    user.premium_until = now_utc + timedelta(days=30)
+                    
+        elif status in ("REJECTED", "CANCELED", "DEADLINE_EXPIRED"):
+            payment.status = "failed"
             
-            # user.is_premium = True
-            # user.premium_until = NOW() + 30 дней
-            USERS_DB[user_id] = {
-                "is_premium": True,
-                "premium_until": (datetime.utcnow() + timedelta(days=30)).isoformat()
-            }
-            # mock.audit('payment_confirmed')
+        await db.commit()
             
-        elif status in ("REJECTED", "CANCELED"):
-            # При Status=REJECTED/CANCELED: payments: status='failed'
-            PAYMENTS_DB[order_id]["status"] = "failed"
-            # mock.audit('payment_failed')
-            
-    # Всегда вернуть {"Success": true} — T-Bank требует этот ответ
+    # Always returning Success: true for TBank
     return {"Success": True}
 
 @router.get("/status/{order_id}")
-async def get_payment_status(order_id: str):
-    """Вернуть {status, is_premium, premium_until}
-    Фронтенд поллит этот эндпоинт после редиректа с payment_url
-    """
-    payment = PAYMENTS_DB.get(order_id)
+async def get_payment_status(
+    order_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        order_uuid = uuid.UUID(order_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid order_id")
+
+    stmt = select(Payment).where(Payment.id == order_uuid, Payment.user_id == user.id)
+    payment = await db.scalar(stmt)
+    
     if not payment:
         raise HTTPException(status_code=404, detail="Order not found")
         
-    user_id = payment["user_id"]
-    user = USERS_DB.get(user_id, {})
+    # User's premium status from the dependent object
+    # DB user refresh happens automatically on endpoint enter, but we can read the properties
     
     return {
-        "status": payment["status"],
-        "is_premium": user.get("is_premium", False),
-        "premium_until": user.get("premium_until", None)
+        "status": payment.status,
+        "is_premium": user.is_premium,
+        "premium_until": user.premium_until.isoformat() if user.premium_until else None
     }

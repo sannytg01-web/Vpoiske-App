@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Lock, User } from "lucide-react";
+import { Heart, User } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
 import { SectionTag } from "../components/ui/SectionTag";
 import { GlassCard } from "../components/ui/GlassCard";
 import { useMatchStore } from "../store/matchStore";
+import { MatchCard } from "../components/matches/MatchCard";
 
 const FilterChip = ({
   label,
@@ -19,7 +20,11 @@ const FilterChip = ({
 }) => (
   <button
     onClick={onClick}
-    className={`filter-chip ${active ? "active" : ""}`}
+    className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all flex items-center shadow-sm ${
+      active 
+        ? "bg-gradient-to-r from-accent-primary to-[#2a6d54] text-white border border-[#4A9E7F]/30 shadow-[0_4px_16px_rgba(74,158,127,0.3)]"
+        : "bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80"
+    }`}
   >
     {label}
   </button>
@@ -77,25 +82,25 @@ export const Matches: React.FC = () => {
         </div>
 
         {/* PILL TABS */}
-        <div className="pill-tab-container mb-6">
-          <button
-            onClick={() => setTab("all")}
-            className={`pill-tab ${activeTab === "all" ? "active" : ""}`}
-          >
-            Все
-          </button>
-          <button
-            onClick={() => setTab("mutual")}
-            className={`pill-tab ${activeTab === "mutual" ? "active" : ""}`}
-          >
-            Взаимные
-          </button>
-          <button
-            onClick={() => setTab("new")}
-            className={`pill-tab ${activeTab === "new" ? "active" : ""}`}
-          >
-            Новые
-          </button>
+        <div className="flex bg-white/5 p-1 rounded-[20px] mb-6 backdrop-blur-md border border-white/10 relative shadow-inner">
+          {["all", "mutual", "new"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setTab(tab as any)}
+              className={`flex-1 py-2.5 text-[15px] font-medium rounded-2xl transition-all relative z-10 ${
+                activeTab === tab ? "text-white shadow-lg" : "text-white/40 hover:text-white/70"
+              }`}
+            >
+              {tab === "all" ? "Все" : tab === "mutual" ? "Взаимные" : "Новые"}
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="activeTabPill"
+                  className="absolute inset-0 bg-white/15 rounded-2xl border border-white/20 -z-10 shadow-[0_2px_10px_rgba(0,0,0,0.2)]"
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                />
+              )}
+            </button>
+          ))}
         </div>
 
         {/* FILTERS */}
@@ -137,61 +142,18 @@ export const Matches: React.FC = () => {
             className="grid grid-cols-2 gap-3 pb-[80px] mt-6"
           >
             <AnimatePresence>
-              {displayMatches.map((m) => (
-                <motion.div
+              {displayMatches.map((m, idx) => (
+                <MatchCard
                   key={m.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 }
-                  }}
+                  name={m.name}
+                  age={m.age}
+                  photoUrl={m.photo || ""}
+                  compatibilityScore={m.score}
+                  isLocked={m.locked}
+                  delayIndex={idx}
                   onClick={() => navigate(`/matches/${m.id}`)}
-                  className="match-card relative"
-                >
-                  {/* PHOTO OR PLACEHOLDER */}
-                  {m.photo ? (
-                    <img
-                      src={m.photo}
-                      alt={m.name}
-                      className="match-card-photo"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1a382f] to-[#0f241d]">
-                      <span
-                        className="text-5xl font-light text-white/30 tracking-tighter uppercase"
-                        style={{ fontFamily: "Manrope" }}
-                      >
-                        {m.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* INFO */}
-                  <div className="match-card-info">
-                    <div className="flex flex-col mb-1">
-                      <h3 className="text-white text-body font-medium leading-none m-0 mb-2">
-                        {m.name}, {m.age}
-                      </h3>
-                      <div>
-                        {/* BADGE */}
-                        <div className="compatibility-badge">
-                          {m.score}% <Heart size={12} fill="white" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* LOCK LAYER */}
-                  {m.locked && (
-                    <div className="lock-overlay z-10">
-                      <div className="flex flex-col items-center justify-center">
-                        <Lock size={24} className="text-white/70 mb-2" />
-                        <span className="text-[10px] font-bold tracking-widest text-white/50">
-                          PREMIUM
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
+                  onUnlockClick={() => navigate("/paywall")}
+                />
               ))}
             </AnimatePresence>
           </motion.div>

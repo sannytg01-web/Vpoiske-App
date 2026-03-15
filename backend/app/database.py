@@ -3,7 +3,7 @@ Vlubvi — Async SQLAlchemy 2.0 engine & session factory.
 Uses asyncpg driver through PgBouncer (transaction mode).
 """
 
-from __future__ import annotations
+
 
 from typing import AsyncGenerator
 
@@ -17,17 +17,19 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 import redis.asyncio as aioredis
 
+from sqlalchemy.pool import NullPool
+
 # ─── Engine ─────────────────────────────────────────────────────
-# pool_size is kept moderate because PgBouncer handles pooling.
+# We use NullPool here because PgBouncer handles pooling natively.
+# This also fixes Event Loop is closed errors in Pytest.
 engine = create_async_engine(
     settings.database_url,
     echo=settings.debug,
-    pool_size=20,
-    max_overflow=10,
     pool_pre_ping=True,
     pool_recycle=1800,
+    poolclass=NullPool,
     # prepare=False is required when using PgBouncer in transaction mode
-    connect_args={"prepared_statement_cache_size": 0},
+    connect_args={"statement_cache_size": 0},
 )
 
 # ─── Session factory ────────────────────────────────────────────

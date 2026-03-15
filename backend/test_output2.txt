@@ -1,0 +1,492 @@
+...F.F...........F                                                       [100%]
+=================================== FAILURES ===================================
+___________________________ test_max_initdata_valid ____________________________
+
+client = <httpx.AsyncClient object at 0x7c6ee2b6f190>
+
+    @pytest.mark.anyio
+    async def test_max_initdata_valid(client: AsyncClient):
+        """Valid MAX initData should return 200 + JWT tokens."""
+        user_data = {"id": 987654321, "first_name": "MaxUser"}
+        init_data = _build_max_init_data(user_data)
+    
+>       response = await client.post("/auth/max", json={"init_data": init_data})
+
+tests/test_auth.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1892: in post
+    return await self.request(
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1574: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/httpx.py:144: in send
+    rv = await real_send(self, request, **kwargs)
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1661: in send
+    response = await self._send_handling_auth(
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1689: in _send_handling_auth
+    response = await self._send_handling_redirects(
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1726: in _send_handling_redirects
+    response = await self._send_single_request(request)
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1763: in _send_single_request
+    response = await transport.handle_async_request(request)
+/usr/local/lib/python3.11/site-packages/httpx/_transports/asgi.py:164: in handle_async_request
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/fastapi/applications.py:1054: in __call__
+    await super().__call__(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:374: in _sentry_patched_asgi_app
+    return await middleware(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asgi.py:152: in _run_asgi3
+    return await self._run_app(scope, receive, send, asgi_version=3)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asgi.py:246: in _run_app
+    raise exc from None
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asgi.py:241: in _run_app
+    return await self.app(
+/usr/local/lib/python3.11/site-packages/starlette/applications.py:123: in __call__
+    await self.middleware_stack(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:189: in __call__
+    with collapse_excgroups():
+/usr/local/lib/python3.11/contextlib.py:158: in __exit__
+    self.gen.throw(typ, value, traceback)
+/usr/local/lib/python3.11/site-packages/starlette/_utils.py:93: in collapse_excgroups
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:191: in __call__
+    response = await self.dispatch_func(request, call_next)
+app/main.py:128: in request_logging_middleware
+    response: Response = await call_next(request)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:165: in call_next
+    raise app_exc
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:151: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/prometheus_fastapi_instrumentator/middleware.py:174: in __call__
+    raise exc
+/usr/local/lib/python3.11/site-packages/prometheus_fastapi_instrumentator/middleware.py:172: in __call__
+    await self.app(scope, receive, send_wrapper)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py:85: in __call__
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:268: in _sentry_exceptionmiddleware_call
+    await old_call(self, scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py:65: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:64: in wrapped_app
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:756: in __call__
+    await self.middleware_stack(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:776: in app
+    await route.handle(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:297: in handle
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:77: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:64: in wrapped_app
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:72: in app
+    response = await func(request)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/fastapi.py:137: in _sentry_app
+    return await old_app(*args, **kwargs)
+/usr/local/lib/python3.11/site-packages/fastapi/routing.py:278: in app
+    raw_response = await run_endpoint_function(
+/usr/local/lib/python3.11/site-packages/fastapi/routing.py:191: in run_endpoint_function
+    return await dependant.call(**values)
+/usr/local/lib/python3.11/site-packages/slowapi/extension.py:734: in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+app/routers/auth.py:161: in auth_max
+    user = await _get_or_create_user(db, max_id=max_user_id)
+app/routers/auth.py:94: in _get_or_create_user
+    result = await db.execute(stmt)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py:461: in execute
+    result = await greenlet_spawn(
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2226: in _execute_internal
+    conn = self._connection_for_bind(bind)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2095: in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+<string>:2: in _connection_for_bind
+    ???
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:1189: in _connection_for_bind
+    conn = bind.connect()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py:3276: in connect
+    return self._connection_cls(self)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py:146: in __init__
+    self._dbapi_connection = engine.raw_connection()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py:3300: in raw_connection
+    return self.pool.connect()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py:449: in connect
+    return _ConnectionFairy._checkout(self)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py:1362: in _checkout
+    with util.safe_reraise():
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py:146: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py:1300: in _checkout
+    result = pool._dialect._do_ping_w_event(
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py:715: in _do_ping_w_event
+    return self.do_ping(dbapi_connection)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:1133: in do_ping
+    dbapi_connection.ping()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:805: in ping
+    self._handle_exception(error)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:786: in _handle_exception
+    raise error
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:803: in ping
+    _ = self.await_(self._async_ping())
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:812: in _async_ping
+    await tr.start()
+/usr/local/lib/python3.11/site-packages/asyncpg/transaction.py:146: in start
+    await self._connection.execute(query)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asyncpg.py:81: in _inner
+    res = await f(*args, **kwargs)
+/usr/local/lib/python3.11/site-packages/asyncpg/connection.py:350: in execute
+    result = await self._protocol.query(query, timeout)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   RuntimeError: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:151> cb=[TaskGroup._spawn.<locals>.task_done() at /usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:805]> got Future <Future pending cb=[Protocol._on_waiter_completed()]> attached to a different loop
+
+asyncpg/protocol/protocol.pyx:374: RuntimeError
+----------------------------- Captured stdout call -----------------------------
+{"error": "Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:151> cb=[TaskGroup._spawn.<locals>.task_done() at /usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:805]> got Future <Future pending cb=[Protocol._on_waiter_completed()]> attached to a different loop", "exc_info": true, "event": "unhandled_exception", "method": "POST", "path": "/auth/max", "client_ip": "127.0.0.1", "level": "error", "timestamp": "2026-03-15T15:10:51.512300Z"}
+------------------------------ Captured log call -------------------------------
+ERROR    sqlalchemy.pool.impl.AsyncAdaptedQueuePool:base.py:378 Exception terminating connection <AdaptedConnection <asyncpg.connection.Connection object at 0x7c6ee45446d0>>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 374, in _close_connection
+    self._dialect.do_terminate(connection)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 1100, in do_terminate
+    dbapi_connection.terminate()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 879, in terminate
+    self.await_(self._connection.close(timeout=2))
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/asyncpg/connection.py", line 1467, in close
+    await self._protocol.close(timeout)
+  File "asyncpg/protocol/protocol.pyx", line 626, in close
+  File "asyncpg/protocol/protocol.pyx", line 659, in asyncpg.protocol.protocol.BaseProtocol._request_cancel
+  File "/usr/local/lib/python3.11/site-packages/asyncpg/connection.py", line 1611, in _cancel_current_command
+    self._cancellations.add(self._loop.create_task(self._cancel(waiter)))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/asyncio/base_events.py", line 435, in create_task
+    self._check_closed()
+  File "/usr/local/lib/python3.11/asyncio/base_events.py", line 520, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+_______________________________ test_jwt_refresh _______________________________
+
+client = <httpx.AsyncClient object at 0x7c6ee12b45d0>
+
+    @pytest.mark.anyio
+    async def test_jwt_refresh(client: AsyncClient):
+        """Refresh token should return new access + refresh pair, old refresh is invalidated."""
+        # First, authenticate
+        user_data = {"id": 555555555, "first_name": "RefreshTest"}
+        init_data = _build_telegram_init_data(user_data)
+    
+>       resp1 = await client.post("/auth/telegram", json={"init_data": init_data})
+
+tests/test_auth.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1892: in post
+    return await self.request(
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1574: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/httpx.py:144: in send
+    rv = await real_send(self, request, **kwargs)
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1661: in send
+    response = await self._send_handling_auth(
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1689: in _send_handling_auth
+    response = await self._send_handling_redirects(
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1726: in _send_handling_redirects
+    response = await self._send_single_request(request)
+/usr/local/lib/python3.11/site-packages/httpx/_client.py:1763: in _send_single_request
+    response = await transport.handle_async_request(request)
+/usr/local/lib/python3.11/site-packages/httpx/_transports/asgi.py:164: in handle_async_request
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/fastapi/applications.py:1054: in __call__
+    await super().__call__(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:374: in _sentry_patched_asgi_app
+    return await middleware(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asgi.py:152: in _run_asgi3
+    return await self._run_app(scope, receive, send, asgi_version=3)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asgi.py:246: in _run_app
+    raise exc from None
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asgi.py:241: in _run_app
+    return await self.app(
+/usr/local/lib/python3.11/site-packages/starlette/applications.py:123: in __call__
+    await self.middleware_stack(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:189: in __call__
+    with collapse_excgroups():
+/usr/local/lib/python3.11/contextlib.py:158: in __exit__
+    self.gen.throw(typ, value, traceback)
+/usr/local/lib/python3.11/site-packages/starlette/_utils.py:93: in collapse_excgroups
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:191: in __call__
+    response = await self.dispatch_func(request, call_next)
+app/main.py:128: in request_logging_middleware
+    response: Response = await call_next(request)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:165: in call_next
+    raise app_exc
+/usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:151: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/prometheus_fastapi_instrumentator/middleware.py:174: in __call__
+    raise exc
+/usr/local/lib/python3.11/site-packages/prometheus_fastapi_instrumentator/middleware.py:172: in __call__
+    await self.app(scope, receive, send_wrapper)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py:85: in __call__
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:268: in _sentry_exceptionmiddleware_call
+    await old_call(self, scope, receive, send)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/starlette.py:169: in _create_span_call
+    return await old_call(app, scope, new_receive, new_send, **kwargs)
+/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py:65: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:64: in wrapped_app
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:756: in __call__
+    await self.middleware_stack(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:776: in app
+    await route.handle(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:297: in handle
+    await self.app(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:77: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:64: in wrapped_app
+    raise exc
+/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+/usr/local/lib/python3.11/site-packages/starlette/routing.py:72: in app
+    response = await func(request)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/fastapi.py:137: in _sentry_app
+    return await old_app(*args, **kwargs)
+/usr/local/lib/python3.11/site-packages/fastapi/routing.py:278: in app
+    raw_response = await run_endpoint_function(
+/usr/local/lib/python3.11/site-packages/fastapi/routing.py:191: in run_endpoint_function
+    return await dependant.call(**values)
+/usr/local/lib/python3.11/site-packages/slowapi/extension.py:734: in async_wrapper
+    response = await func(*args, **kwargs)  # type: ignore
+app/routers/auth.py:137: in auth_telegram
+    user = await _get_or_create_user(db, telegram_id=telegram_id)
+app/routers/auth.py:94: in _get_or_create_user
+    result = await db.execute(stmt)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/ext/asyncio/session.py:461: in execute
+    result = await greenlet_spawn(
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:201: in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2351: in execute
+    return self._execute_internal(
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2226: in _execute_internal
+    conn = self._connection_for_bind(bind)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:2095: in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+<string>:2: in _connection_for_bind
+    ???
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py:1189: in _connection_for_bind
+    conn = bind.connect()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py:3276: in connect
+    return self._connection_cls(self)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py:146: in __init__
+    self._dbapi_connection = engine.raw_connection()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py:3300: in raw_connection
+    return self.pool.connect()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py:449: in connect
+    return _ConnectionFairy._checkout(self)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py:1362: in _checkout
+    with util.safe_reraise():
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py:146: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py:1300: in _checkout
+    result = pool._dialect._do_ping_w_event(
+/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py:715: in _do_ping_w_event
+    return self.do_ping(dbapi_connection)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:1133: in do_ping
+    dbapi_connection.ping()
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:805: in ping
+    self._handle_exception(error)
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:786: in _handle_exception
+    raise error
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:803: in ping
+    _ = self.await_(self._async_ping())
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:132: in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py:196: in greenlet_spawn
+    value = await result
+/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py:812: in _async_ping
+    await tr.start()
+/usr/local/lib/python3.11/site-packages/asyncpg/transaction.py:146: in start
+    await self._connection.execute(query)
+/usr/local/lib/python3.11/site-packages/sentry_sdk/integrations/asyncpg.py:81: in _inner
+    res = await f(*args, **kwargs)
+/usr/local/lib/python3.11/site-packages/asyncpg/connection.py:350: in execute
+    result = await self._protocol.query(query, timeout)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   RuntimeError: Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:151> cb=[TaskGroup._spawn.<locals>.task_done() at /usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:805]> got Future <Future pending cb=[Protocol._on_waiter_completed()]> attached to a different loop
+
+asyncpg/protocol/protocol.pyx:374: RuntimeError
+----------------------------- Captured stdout call -----------------------------
+{"error": "Task <Task pending name='starlette.middleware.base.BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro' coro=<BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.coro() running at /usr/local/lib/python3.11/site-packages/starlette/middleware/base.py:151> cb=[TaskGroup._spawn.<locals>.task_done() at /usr/local/lib/python3.11/site-packages/anyio/_backends/_asyncio.py:805]> got Future <Future pending cb=[Protocol._on_waiter_completed()]> attached to a different loop", "exc_info": true, "event": "unhandled_exception", "method": "POST", "path": "/auth/telegram", "client_ip": "127.0.0.1", "level": "error", "timestamp": "2026-03-15T15:10:55.042950Z"}
+------------------------------ Captured log call -------------------------------
+ERROR    sqlalchemy.pool.impl.AsyncAdaptedQueuePool:base.py:378 Exception terminating connection <AdaptedConnection <asyncpg.connection.Connection object at 0x7c6ee2a158a0>>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 374, in _close_connection
+    self._dialect.do_terminate(connection)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 1100, in do_terminate
+    dbapi_connection.terminate()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 879, in terminate
+    self.await_(self._connection.close(timeout=2))
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/asyncpg/connection.py", line 1467, in close
+    await self._protocol.close(timeout)
+  File "asyncpg/protocol/protocol.pyx", line 626, in close
+  File "asyncpg/protocol/protocol.pyx", line 659, in asyncpg.protocol.protocol.BaseProtocol._request_cancel
+  File "/usr/local/lib/python3.11/site-packages/asyncpg/connection.py", line 1611, in _cancel_current_command
+    self._cancellations.add(self._loop.create_task(self._cancel(waiter)))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/asyncio/base_events.py", line 435, in create_task
+    self._check_closed()
+  File "/usr/local/lib/python3.11/asyncio/base_events.py", line 520, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+____________________________ test_recurring_charge _____________________________
+
+    @pytest.mark.asyncio
+    async def test_recurring_charge():
+        """charge_recurring возвращает True при успехе"""
+        from app.services.tbank import charge_recurring
+>       with patch("app.services.tbank.httpx.AsyncClient.post") as mock_post:
+
+tests/test_payment.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'app.services.tbank.httpx.AsyncClient'
+
+    def resolve_name(name):
+        """
+        Resolve a name to an object.
+    
+        It is expected that `name` will be a string in one of the following
+        formats, where W is shorthand for a valid Python identifier and dot stands
+        for a literal period in these pseudo-regexes:
+    
+        W(.W)*
+        W(.W)*:(W(.W)*)?
+    
+        The first form is intended for backward compatibility only. It assumes that
+        some part of the dotted name is a package, and the rest is an object
+        somewhere within that package, possibly nested inside other objects.
+        Because the place where the package stops and the object hierarchy starts
+        can't be inferred by inspection, repeated attempts to import must be done
+        with this form.
+    
+        In the second form, the caller makes the division point clear through the
+        provision of a single colon: the dotted name to the left of the colon is a
+        package to be imported, and the dotted name to the right is the object
+        hierarchy within that package. Only one import is needed in this form. If
+        it ends with the colon, then a module object is returned.
+    
+        The function will return an object (which might be a module), or raise one
+        of the following exceptions:
+    
+        ValueError - if `name` isn't in a recognised format
+        ImportError - if an import failed when it shouldn't have
+        AttributeError - if a failure occurred when traversing the object hierarchy
+                         within the imported package to get to the desired object.
+        """
+        global _NAME_PATTERN
+        if _NAME_PATTERN is None:
+            # Lazy import to speedup Python startup time
+            import re
+            dotted_words = r'(?!\d)(\w+)(\.(?!\d)(\w+))*'
+            _NAME_PATTERN = re.compile(f'^(?P<pkg>{dotted_words})'
+                                       f'(?P<cln>:(?P<obj>{dotted_words})?)?$',
+                                       re.UNICODE)
+    
+        m = _NAME_PATTERN.match(name)
+        if not m:
+            raise ValueError(f'invalid format: {name!r}')
+        gd = m.groupdict()
+        if gd.get('cln'):
+            # there is a colon - a one-step import is all that's needed
+            mod = importlib.import_module(gd['pkg'])
+            parts = gd.get('obj')
+            parts = parts.split('.') if parts else []
+        else:
+            # no colon - have to iterate to find the package boundary
+            parts = name.split('.')
+            modname = parts.pop(0)
+            # first part *must* be a module/package.
+            mod = importlib.import_module(modname)
+            while parts:
+                p = parts[0]
+                s = f'{modname}.{p}'
+                try:
+                    mod = importlib.import_module(s)
+                    parts.pop(0)
+                    modname = s
+                except ImportError:
+                    break
+        # if we reach this point, mod is the module, already imported, and
+        # parts is the list of parts in the object hierarchy to be traversed, or
+        # an empty list if just the module is wanted.
+        result = mod
+        for p in parts:
+>           result = getattr(result, p)
+E           AttributeError: module 'app.services.tbank' has no attribute 'httpx'
+
+/usr/local/lib/python3.11/pkgutil.py:715: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_auth.py::test_max_initdata_valid - RuntimeError: Task <Task...
+FAILED tests/test_auth.py::test_jwt_refresh - RuntimeError: Task <Task pendin...
+FAILED tests/test_payment.py::test_recurring_charge - AttributeError: module ...
+3 failed, 15 passed in 18.37s

@@ -3,7 +3,7 @@ Vlubvi — Pydantic v2 Settings.
 Reads from .env, validates, and provides typed access to all config values.
 """
 
-from __future__ import annotations
+
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -78,6 +78,14 @@ class Settings(BaseSettings):
         """Allow PEM keys stored in env with literal \\n."""
         if isinstance(v, str):
             return v.replace("\\n", "\n")
+        return v
+
+    @field_validator("encryption_key", mode="before")
+    @classmethod
+    def strip_encryption_key(cls, v: str) -> str:
+        """Strip trailing \\r or \\n from the key securely."""
+        if isinstance(v, str):
+            return v.strip()
         return v
 
 

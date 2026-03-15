@@ -7,7 +7,7 @@ Vlubvi — JWT RS256 Authentication & Platform Verification.
 - MAX initData HMAC-SHA256 verification
 """
 
-from __future__ import annotations
+
 
 import hashlib
 import hmac

@@ -8,16 +8,32 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
 import { pageTransition } from '../utils/animations';
 import { tgAlert } from '../utils/telegram';
+import { apiClient } from '../api/client';
 
 export const DataExport: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleExportData = () => {
-    // В реальном приложении здесь будет запрос к API
-    tgAlert('Ваш запрос на экспорт данных принят. Архив будет отправлен вам ботом в Telegram.');
-    setTimeout(() => {
-      navigate('/profile');
-    }, 1500);
+  const handleExportData = async () => {
+    try {
+      const response = await apiClient.get('/gdpr/export');
+      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vlubvi_data_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      tgAlert('Ваш архив успешно сформирован и скачан.');
+      setTimeout(() => {
+        navigate('/profile');
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      tgAlert('Произошла ошибка при экспорте данных.');
+    }
   };
 
   return (

@@ -2,7 +2,6 @@
 Vlubvi — SQLAlchemy 2.0 ORM Models.
 All tables defined per the specification.
 """
-
 from __future__ import annotations
 
 import uuid
