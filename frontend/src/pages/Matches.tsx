@@ -17,12 +17,12 @@ const FilterChip = ({
   active?: boolean;
   onClick?: () => void;
 }) => (
-  <div
+  <button
     onClick={onClick}
-    className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${active ? "bg-white text-[#0d1f1a]" : "bg-white/10 text-white/70 border border-white/5 hover:bg-white/20"}`}
+    className={`filter-chip ${active ? "active" : ""}`}
   >
     {label}
-  </div>
+  </button>
 );
 
 export const Matches: React.FC = () => {
@@ -58,43 +58,41 @@ export const Matches: React.FC = () => {
 
       <div className="flex-1 overflow-y-auto px-4 py-8 pb-24">
         {/* HEADER */}
-        <div className="flex justify-between items-start mb-6 mt-2">
+        <div className="flex justify-between items-start mb-6 pt-2">
           <div>
             <SectionTag className="mb-2">ДЛЯ ТЕБЯ</SectionTag>
-            <h2 className="text-h2 text-white m-0 tracking-tight">
+            <h2 className="text-h2 text-white m-0 tracking-tight flex items-center">
               Совпадения
+              <span className="ml-3 bg-accent-warm text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-[0_0_15px_rgba(229,176,121,0.5)]">
+                +2 новых
+              </span>
             </h2>
           </div>
-          <div className="flex flex-col items-end">
-            <button
-              onClick={() => navigate("/profile")}
-              className="p-2.5 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 text-white transition-colors mb-2 shadow-lg"
-            >
-              <User size={18} />
-            </button>
-            <div className="bg-accent-warm text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-[0_0_15px_rgba(229,176,121,0.5)] tracking-wide uppercase">
-              +2 новых
-            </div>
-          </div>
+          <button
+            onClick={() => navigate("/profile")}
+            className="p-2.5 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 text-white transition-colors shadow-lg"
+          >
+            <User size={18} />
+          </button>
         </div>
 
         {/* PILL TABS */}
-        <div className="flex bg-white/5 p-1 rounded-2xl mb-6">
+        <div className="pill-tab-container mb-6">
           <button
             onClick={() => setTab("all")}
-            className={`flex-1 py-2 text-sm font-medium rounded-xl transition-all ${activeTab === "all" ? "bg-white/10 text-white shadow-sm" : "text-white/40"}`}
+            className={`pill-tab ${activeTab === "all" ? "active" : ""}`}
           >
             Все
           </button>
           <button
             onClick={() => setTab("mutual")}
-            className={`flex-1 py-2 text-sm font-medium rounded-xl transition-all ${activeTab === "mutual" ? "bg-white/10 text-white shadow-sm" : "text-white/40"}`}
+            className={`pill-tab ${activeTab === "mutual" ? "active" : ""}`}
           >
             Взаимные
           </button>
           <button
             onClick={() => setTab("new")}
-            className={`flex-1 py-2 text-sm font-medium rounded-xl transition-all ${activeTab === "new" ? "bg-white/10 text-white shadow-sm" : "text-white/40"}`}
+            className={`pill-tab ${activeTab === "new" ? "active" : ""}`}
           >
             Новые
           </button>
@@ -129,72 +127,74 @@ export const Matches: React.FC = () => {
             </p>
           </GlassCard>
         ) : (
-          <div className="grid grid-cols-2 gap-3 pb-[80px] mt-6">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+            }}
+            className="grid grid-cols-2 gap-3 pb-[80px] mt-6"
+          >
             <AnimatePresence>
-              {displayMatches.map((m, i) => (
+              {displayMatches.map((m) => (
                 <motion.div
                   key={m.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.08 }}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
                   onClick={() => navigate(`/matches/${m.id}`)}
-                  className="relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer"
+                  className="match-card relative"
                 >
                   {/* PHOTO OR PLACEHOLDER */}
                   {m.photo ? (
                     <img
                       src={m.photo}
                       alt={m.name}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="match-card-photo"
                     />
                   ) : (
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1a382f] to-[#0f241d]">
                       <span
-                        className="text-4xl font-light text-white/30 tracking-tighter"
-                        style={{ fontFamily: "Instrument Serif" }}
+                        className="text-5xl font-light text-white/30 tracking-tighter uppercase"
+                        style={{ fontFamily: "Manrope" }}
                       >
                         {m.name.charAt(0)}
                       </span>
                     </div>
                   )}
 
-                  {/* OVERLAY GRADIENT */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
                   {/* INFO */}
-                  <div className="absolute bottom-0 left-0 w-full p-3">
-                    <div className="flex items-end justify-between mb-1">
-                      <h3 className="text-white font-medium text-lg leading-none m-0">
+                  <div className="match-card-info">
+                    <div className="flex flex-col mb-1">
+                      <h3 className="text-white text-body font-medium leading-none m-0 mb-2">
                         {m.name}, {m.age}
                       </h3>
-                    </div>
-                    {/* BADGE */}
-                    <div className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md border border-white/10">
-                      <span className="text-xs font-medium text-white">
-                        {m.score}%
-                      </span>
-                      <Heart
-                        size={10}
-                        className="text-accent-warm fill-accent-warm"
-                      />
+                      <div>
+                        {/* BADGE */}
+                        <div className="compatibility-badge">
+                          {m.score}% <Heart size={12} fill="white" />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* LOCK LAYER */}
                   {m.locked && (
-                    <div className="absolute inset-0 backdrop-blur-[8px] bg-[#0d1f1a]/60 flex flex-col items-center justify-center transition-all z-10">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-2 border border-white/10">
-                        <Lock size={18} className="text-white" />
+                    <div className="lock-overlay z-10">
+                      <div className="flex flex-col items-center justify-center">
+                        <Lock size={24} className="text-white/70 mb-2" />
+                        <span className="text-[10px] font-bold tracking-widest text-white/50">
+                          PREMIUM
+                        </span>
                       </div>
-                      <span className="text-caption font-semibold tracking-wider text-white">
-                        PREMIUM
-                      </span>
                     </div>
                   )}
                 </motion.div>
               ))}
             </AnimatePresence>
-          </div>
+          </motion.div>
         )}
       </div>
     </motion.div>

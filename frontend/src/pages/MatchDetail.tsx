@@ -177,47 +177,51 @@ export const MatchDetail: React.FC = () => {
         </div>
 
         {/* HORIZONTAL BREAKDOWN TABS */}
-        <div
-          className="flex overflow-x-auto space-x-3 mb-6 pb-2 scrollbar-hide"
-          style={{ margin: "0 -16px", padding: "0 16px" }}
-        >
-          <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
-            <div className="bg-[#4A9E7F]/10 p-2 rounded-lg">
-              <Diamond className="text-[#4A9E7F]" size={18} />
+        <div className="w-full relative overflow-hidden mb-6">
+          <div
+            className="flex overflow-x-auto space-x-3 pb-2 scrollbar-hide px-4"
+            style={{ margin: "0 -16px" }}
+          >
+            <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
+              <div className="bg-[#4A9E7F]/10 p-2 rounded-lg">
+                <Diamond className="text-[#4A9E7F]" size={18} />
+              </div>
+              <div className="pr-4">
+                <span className="block text-[10px] text-white/50 font-bold tracking-wider uppercase">
+                  HD-Механика
+                </span>
+                <span className="block text-body text-white font-medium">
+                  {d?.hd_score ?? 85}%
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="block text-[10px] text-white/50 font-bold tracking-wider uppercase">
-                HD-Механика
-              </span>
-              <span className="block text-body text-white font-medium">
-                {d?.hd_score ?? 0}%
-              </span>
+            
+            <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
+              <div className="bg-[#B0BEC5]/10 p-2 rounded-lg">
+                <Brain className="text-[#B0BEC5]" size={18} />
+              </div>
+              <div className="pr-4">
+                <span className="block text-[10px] text-white/50 font-bold tracking-wider uppercase">
+                  Психология
+                </span>
+                <span className="block text-body text-white font-medium">
+                  {d?.psychology_score ?? 92}%
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
-            <div className="bg-[#B0BEC5]/10 p-2 rounded-lg">
-              <Brain className="text-[#B0BEC5]" size={18} />
-            </div>
-            <div>
-              <span className="block text-[10px] text-white/50 font-bold tracking-wider uppercase">
-                Психология
-              </span>
-              <span className="block text-body text-white font-medium">
-                {d?.psychology_score ?? 0}%
-              </span>
-            </div>
-          </div>
-          <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
-            <div className="bg-accent-warm/10 p-2 rounded-lg">
-              <Heart className="text-accent-warm" size={18} />
-            </div>
-            <div>
-              <span className="block text-[10px] text-white/50 font-bold tracking-wider uppercase">
-                Ценности
-              </span>
-              <span className="block text-body text-white font-medium">
-                {d?.values_score ?? 0}%
-              </span>
+            
+            <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
+              <div className="bg-accent-warm/10 p-2 rounded-lg">
+                <Heart className="text-accent-warm" size={18} />
+              </div>
+              <div className="pr-4">
+                <span className="block text-[10px] text-white/50 font-bold tracking-wider uppercase">
+                  Ценности
+                </span>
+                <span className="block text-body text-white font-medium">
+                  {d?.values_score ?? 96}%
+                </span>
+              </div>
             </div>
           </div>
         </div>
