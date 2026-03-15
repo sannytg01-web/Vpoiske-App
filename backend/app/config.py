@@ -43,6 +43,7 @@ class Settings(BaseSettings):
 
     # ─── Telegram ───────────────────────────────────────────────
     bot_token: str = Field(..., description="Telegram Bot API token")
+    web_app_url: str = Field(default="https://vlubvi.app", description="URL for Telegram Web App button")
 
     # ─── MAX (max.ru) ───────────────────────────────────────────
     max_secret_key: str = Field(..., description="MAX MiniApp secret key")

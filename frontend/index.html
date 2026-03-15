@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ВПоиске</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- MAX Bridge: CDN только если платформа MAX (НЕ npm) -->
+    <script>
+      (function() {
+        var isMax = window.location.search.indexOf('max_app') !== -1 ||
+                    document.referrer.indexOf('max.ru') !== -1;
+        if (isMax) {
+          var s = document.createElement('script');
+          s.src = 'https://st.max.ru/js/max-web-app.js';
+          s.async = false;
+          document.head.appendChild(s);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { 
+  box-sizing: border-box; 
+  -webkit-tap-highlight-color: transparent; 
+  user-select: none; 
+}
+
+body { 
+  margin: 0; 
+  background: var(--bg-primary); 
+  color: var(--text-primary);
+  overflow: hidden; 
+  height: 100dvh; 
+}
+
+input, textarea { 
+  user-select: text; 
+}
+
+#root { 
+  height: 100dvh; 
+  display: flex; 
+  flex-direction: column; 
+  overflow: hidden; 
+}
+
+.page-content { 
+  flex: 1; 
+  overflow-y: auto; 
+  overflow-x: hidden;
+  padding-top: var(--safe-top); 
+  padding-bottom: calc(72px + var(--safe-bottom));
+  -webkit-overflow-scrolling: touch; 
+  scrollbar-width: none; 
+}
+
+.page-content::-webkit-scrollbar { 
+  display: none; 
+}

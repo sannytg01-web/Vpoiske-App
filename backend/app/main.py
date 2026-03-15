@@ -24,7 +24,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
 from app.core.rate_limiter import limiter
-from app.routers import auth
+from app.routers import auth, consent, interview, geo, birth_data, matches, chat, payment, profile, gdpr, bot
 
 # ─── Structlog Configuration ───────────────────────────────────
 structlog.configure(
@@ -81,8 +81,9 @@ ALLOWED_ORIGINS = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
     max_age=600,
 )
@@ -96,7 +97,16 @@ Instrumentator(
 
 # ─── Routers ───────────────────────────────────────────────────
 app.include_router(auth.router)
-
+app.include_router(consent.router)
+app.include_router(interview.router)
+app.include_router(geo.router)
+app.include_router(birth_data.router)
+app.include_router(matches.router)
+app.include_router(chat.router)
+app.include_router(payment.router)
+app.include_router(profile.router)
+app.include_router(gdpr.router)
+app.include_router(bot.router)
 
 # ─── Health Check ──────────────────────────────────────────────
 @app.get("/health", tags=["system"])

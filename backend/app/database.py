@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 
 from app.config import settings
+import redis.asyncio as aioredis
 
 # ─── Engine ─────────────────────────────────────────────────────
 # pool_size is kept moderate because PgBouncer handles pooling.
@@ -57,3 +58,11 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             raise
         finally:
             await session.close()
+
+async def get_redis():
+    """FastAPI dependency - yields an async redis client."""
+    redis = aioredis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+    try:
+        yield redis
+    finally:
+        await redis.aclose()
