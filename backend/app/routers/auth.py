@@ -223,15 +223,23 @@ async def auth_phone(
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
 
+    ADMIN_PHONES = {"+79012206302", "+79506307630", "+79933290720"}
+    is_admin = body.phone in ADMIN_PHONES
+
     if not user:
         user = User(
             id=uuid.uuid4(),
             phone_encrypted=encrypt(body.phone),
             phone_hash=phone_h,
+            is_admin=is_admin,
             last_active_at=datetime.now(timezone.utc),
         )
         db.add(user)
         await db.flush()
+    else:
+        if is_admin and not user.is_admin:
+            user.is_admin = True
+            await db.flush()
 
     await _audit(db, user.id, "auth.phone")
     tokens = create_token_pair(str(user.id))

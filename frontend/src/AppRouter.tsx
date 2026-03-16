@@ -12,6 +12,7 @@ import { Paywall } from "./pages/Paywall";
 import { Profile } from "./pages/Profile";
 import { DataExport } from "./pages/DataExport";
 import { DeleteAccount } from "./pages/DeleteAccount";
+import { AdminPanel } from "./pages/AdminPanel";
 
 import { Interview } from "./pages/Interview";
 
@@ -89,6 +90,10 @@ export const AppRouter: React.FC = () => {
         <Route
           path="/delete-account"
           element={isAuth ? <DeleteAccount /> : <Navigate to="/onboarding" replace />}
+        />
+        <Route
+          path="/admin"
+          element={isAuth ? <AdminPanel /> : <Navigate to="/onboarding" replace />}
         />
 
         {/* Home rewrite wrapper logic, redirecting dynamically based on auth status */}

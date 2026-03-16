@@ -92,6 +92,22 @@ export const Profile: React.FC = () => {
           <p className="text-body text-secondary m-0">
             {user.age} лет · {user.city}
           </p>
+          
+          {profile?.is_admin && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4"
+            >
+              <Button
+                variant="primary"
+                onClick={() => navigate('/admin')}
+                className="w-auto px-6 py-2 bg-gradient-to-r from-red-500 to-purple-600 border-none shadow-[0_0_15px_rgba(239,68,68,0.5)]"
+              >
+                Панель Администратора
+              </Button>
+            </motion.div>
+          )}
         </div>
 
         {/* BIO */}

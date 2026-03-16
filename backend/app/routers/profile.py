@@ -23,6 +23,7 @@ class ProfileResponse(BaseModel):
     bio: Optional[str]
     photo_url: Optional[str]
     is_visible: bool
+    is_admin: bool
 
 class ProfileUpdateRequest(BaseModel):
     name: Optional[str] = None
@@ -58,6 +59,7 @@ async def get_my_profile(
         "bio": profile.bio,
         "photo_url": profile.photo_url,
         "is_visible": profile.is_visible,
+        "is_admin": user.is_admin,
     }
 
 @router.put("/me", response_model=ProfileResponse)

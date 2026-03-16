@@ -11,6 +11,7 @@ interface ProfileData {
   bio: string | null;
   photo_url: string | null;
   is_visible: boolean;
+  is_admin: boolean;
 }
 
 interface ProfileState {
