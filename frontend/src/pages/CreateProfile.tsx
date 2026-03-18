@@ -109,7 +109,7 @@ export const CreateProfile: React.FC = () => {
         </GlassCard>
 
         {/* CITY */}
-        <GlassCard className="p-5 mb-4 relative">
+        <GlassCard className="p-5 mb-4 relative" style={{ zIndex: showCityDropdown ? 100 : 'auto' }}>
           <div className="flex items-center gap-3 mb-3">
             <MapPin size={20} className="text-accent-warm" />
             <span className="text-[10px] text-white/50 font-bold tracking-wider uppercase">Город</span>
@@ -129,8 +129,8 @@ export const CreateProfile: React.FC = () => {
           </div>
           
           {showCityDropdown && filteredCities.length > 0 && (
-            <div className="absolute left-0 right-0 bottom-full mb-1 mx-5 max-h-48 overflow-y-auto rounded-xl z-[100]"
-              style={{ background: '#142920', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 -4px 24px rgba(0,0,0,0.5)' }}
+            <div className="absolute left-0 right-0 top-full mt-1 mx-0 max-h-52 overflow-y-auto rounded-xl z-[200]"
+              style={{ background: '#142920', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
             >
               {filteredCities.map(city => (
                 <button
@@ -149,15 +149,21 @@ export const CreateProfile: React.FC = () => {
           )}
         </GlassCard>
 
-        {/* CONTINUE — hidden when dropdown is open */}
-        {!showCityDropdown && (
-          <div className="mt-auto pt-4">
-            <Button variant="primary" onClick={handleSave} disabled={!canContinue} className="w-full">
-              Продолжить к интервью →
-            </Button>
-          </div>
-        )}
+        {/* CONTINUE — always visible, dropdown overlays it */}
+        <div className="mt-auto pt-4 relative z-0">
+          <Button variant="primary" onClick={handleSave} disabled={!canContinue} className="w-full">
+            Продолжить к интервью →
+          </Button>
+        </div>
       </div>
+
+      {/* Overlay backdrop to close dropdown on outside tap */}
+      {showCityDropdown && (
+        <div 
+          className="fixed inset-0 z-[99]" 
+          onClick={() => setShowCityDropdown(false)} 
+        />
+      )}
     </motion.div>
   );
 };
