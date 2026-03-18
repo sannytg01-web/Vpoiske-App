@@ -167,8 +167,8 @@ export const Interview: React.FC = () => {
             value={inputValue}
             onChange={setInputValue}
             onSend={(text) => {
-              setInputValue(text);
               if (!text.trim() || isTyping) return;
+              setInputValue(''); // Clear input after send
               
               sendMessage(text.trim());
 
@@ -192,24 +192,45 @@ export const Interview: React.FC = () => {
                   completeInterview();
                 }
               }).catch((e) => {
-                console.error(e);
-                const mockReplies = [
-                  "Понятно. Звучит очень интересно! А какие у тебя главные ценности в жизни?",
-                  "Супер! А как ты обычно проводишь свободное время?",
-                  "Здорово. Что для тебя важнее всего в отношениях?",
-                  "Спасибо за искренность! Думаю, я узнал достаточно для начала."
+                console.error("API unavailable, using offline interview:", e);
+                const offlineQuestions = [
+                  "Интересно! Расскажи, как выглядит твой идеальный выходной день — если бы не было вообще никаких ограничений?",
+                  "А если этот идеальный день — с близким человеком, как он выглядит?",
+                  "Что тебя быстрее выматывает: долго быть среди людей или долго быть в одиночестве?",
+                  "Опиши момент в жизни, когда ты чувствовал(а) себя по-настоящему «в своей тарелке».",
+                  "Какие три качества ты больше всего ценишь в людях?",
+                  "А какие три качества тебе сложнее всего принять в других?",
+                  "Как ты обычно реагируешь на конфликт? Уходишь, обсуждаешь сразу, или что-то другое?",
+                  "Вспомни ситуацию, где тебе было очень сложно принять решение. Как ты справился(ась)?",
+                  "Что для тебя значит «личное пространство» в отношениях?",
+                  "Как ты относишься к спонтанности? Любишь сюрпризы или предпочитаешь планировать?",
+                  "Какие эмоции тебе сложнее всего прожить и выразить?",
+                  "Были ли в твоей жизни моменты, когда ты понимал(а), что нужно кардинально поменять что-то в себе?",
+                  "Что для тебя важнее: стабильность или новизна? Почему?",
+                  "Как ты обычно проявляешь любовь и заботу к близким людям?",
+                  "Какие ценности для тебя абсолютно не подлежат компромиссу?",
+                  "Представь себе отношения мечты через 5 лет. Как они выглядят?",
+                  "Что тебе важнее услышать от партнёра: «Я горжусь тобой» или «Я рядом, чем бы ты ни был занят(а)»?",
+                  "Спасибо за такое глубокое интервью! Я собрал достаточно данных для создания твоего психологического профиля. Сейчас мы перейдём к последнему шагу — дате рождения для Human Design карты. 🌟"
                 ];
-                const replyText = mockReplies[Math.min(currentQuestionIndex, mockReplies.length - 1)];
-                addMessage({
-                  id: Date.now().toString(),
-                  role: "ai",
-                  text: replyText,
-                });
-                if (currentQuestionIndex >= 3) {
-                  completeInterview();
-                } else {
-                  setQuestionIndex(currentQuestionIndex + 1);
-                }
+                const qIdx = Math.min(currentQuestionIndex, offlineQuestions.length - 1);
+                const replyText = offlineQuestions[qIdx];
+                
+                // Simulate typing delay for realistic feel
+                setTimeout(() => {
+                  addMessage({
+                    id: Date.now().toString(),
+                    role: "ai",
+                    text: replyText,
+                  });
+                  if (currentQuestionIndex >= 17) {
+                    completeInterview();
+                  } else {
+                    setQuestionIndex(currentQuestionIndex + 1);
+                  }
+                  setTyping(false);
+                }, 1500);
+                return; // don't call finally() for typing
               }).finally(() => {
                 setTyping(false);
               });
