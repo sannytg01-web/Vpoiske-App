@@ -252,12 +252,9 @@ export const Onboarding: React.FC = () => {
       <PhoneAuthModal 
         isOpen={isPhoneModalOpen} 
         onClose={() => setPhoneModalOpen(false)} 
-        onSuccess={(isAdmin) => {
-          if (isAdmin) {
-            navigate('/admin');
-          } else {
-            navigate('/consent');
-          }
+        onSuccess={() => {
+          // ALL users go through the standard flow — admins too!
+          navigate('/consent');
         }} 
       />
     </motion.div>

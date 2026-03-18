@@ -36,13 +36,18 @@ export const AdminPanel: React.FC = () => {
     }
   }, [activeTab, stats]);
 
-  const isAdminLocal = localStorage.getItem('vpoiske_is_admin') === 'true';
+  // Strict admin check: verify actual phone number, not just a flag
+  const ADMIN_PHONES = ['+79012206302', '+79506307630', '+79933290720'];
+  const userPhone = localStorage.getItem('vpoiske_phone') || '';
+  const isAdminByPhone = ADMIN_PHONES.includes(userPhone);
+  const isAdminLocal = isAdminByPhone && localStorage.getItem('vpoiske_is_admin') === 'true';
 
   if (!profile?.is_admin && !isAdminLocal) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-white bg-[#0A0D10]">
         <h2>Доступ запрещен</h2>
-        <button className="mt-4 text-accent-primary" onClick={() => navigate('/profile')}>
+        <p className="text-white/40 mt-2 text-sm">Только для администраторов</p>
+        <button className="mt-4 text-accent-primary" onClick={() => navigate('/matches')}>
           Вернуться
         </button>
       </div>

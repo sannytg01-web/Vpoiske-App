@@ -50,6 +50,12 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('vpoiske_is_admin');
+        localStorage.removeItem('vpoiske_phone');
+        localStorage.removeItem('vpoiske_user_name');
+        localStorage.removeItem('vpoiske_user_city');
+        localStorage.removeItem('vpoiske_user_gender');
+        localStorage.removeItem('vpoiske_user_age');
         set({ 
           userId: null, isAuthenticated: false, initData: null, 
           hasCompletedInterview: false, hasCompletedBirthData: false, 

@@ -52,7 +52,10 @@ export const Profile: React.FC = () => {
     await updateProfile({ bio: bioText });
   };
 
-  const isAdminLocal = localStorage.getItem('vpoiske_is_admin') === 'true';
+  // Strict admin check: verify actual phone number
+  const ADMIN_PHONES = ['+79012206302', '+79506307630', '+79933290720'];
+  const userPhone = localStorage.getItem('vpoiske_phone') || '';
+  const isAdminLocal = ADMIN_PHONES.includes(userPhone);
 
   return (
     <motion.div

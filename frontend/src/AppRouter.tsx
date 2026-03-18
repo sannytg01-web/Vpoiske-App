@@ -23,7 +23,7 @@ export const AppRouter: React.FC = () => {
   const hasCompletedBirthData = useAuthStore((s) => s.hasCompletedBirthData);
 
   const getInitialRoute = () => {
-    if (localStorage.getItem('vpoiske_is_admin') === 'true') return "/admin";
+    // ALL users (including admins) follow the standard flow
     if (!isAuth) return "/onboarding";
     if (!hasCompletedInterview) return "/consent";
     if (!hasCompletedBirthData) return "/birth-data";
@@ -101,7 +101,11 @@ export const AppRouter: React.FC = () => {
         />
         <Route
           path="/admin"
-          element={isAuth ? <AdminPanel /> : <Navigate to="/onboarding" replace />}
+          element={
+            isAuth && localStorage.getItem('vpoiske_is_admin') === 'true' 
+              ? <AdminPanel /> 
+              : <Navigate to="/matches" replace />
+          }
         />
 
         {/* Home rewrite wrapper logic, redirecting dynamically based on auth status */}
