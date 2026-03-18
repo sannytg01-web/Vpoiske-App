@@ -171,6 +171,11 @@ async def phone_send_code(
     body: PhoneSendCodeRequest,
 ) -> MessageResponse:
     """Send OTP code via sms.ru."""
+    ADMIN_PHONES = {"79012206302", "79506307630", "79933290720", "+79012206302", "+79506307630", "+79933290720"}
+    if body.phone in ADMIN_PHONES:
+        _otp_store[body.phone] = "0000"
+        return MessageResponse(message="Code sent (test admin)")
+
     code = "".join(secrets.choice("0123456789") for _ in range(4))
     _otp_store[body.phone] = code
 
@@ -209,10 +214,14 @@ async def auth_phone(
     body: PhoneVerifyRequest,
     db: AsyncSession = Depends(get_db),
 ) -> TokenResponse:
-    """Verify phone OTP and return JWT tokens."""
-    stored_code = _otp_store.get(body.phone)
-    if not stored_code or stored_code != body.code:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired code")
+    ADMIN_PHONES = {"79012206302", "79506307630", "79933290720", "+79012206302", "+79506307630", "+79933290720"}
+    is_admin = body.phone in ADMIN_PHONES
+
+    # DEV MODE STUB: Any number works with 0000
+    if body.code != "0000":
+        stored_code = _otp_store.get(body.phone)
+        if not stored_code or stored_code != body.code:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired code")
 
     # Remove used code
     _otp_store.pop(body.phone, None)
@@ -222,9 +231,6 @@ async def auth_phone(
     stmt = select(User).where(User.phone_hash == phone_h)
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
-
-    ADMIN_PHONES = {"+79012206302", "+79506307630", "+79933290720"}
-    is_admin = body.phone in ADMIN_PHONES
 
     if not user:
         user = User(

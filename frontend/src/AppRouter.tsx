@@ -13,6 +13,7 @@ import { Profile } from "./pages/Profile";
 import { DataExport } from "./pages/DataExport";
 import { DeleteAccount } from "./pages/DeleteAccount";
 import { AdminPanel } from "./pages/AdminPanel";
+import { CreateProfile } from "./pages/CreateProfile";
 
 import { Interview } from "./pages/Interview";
 
@@ -22,6 +23,7 @@ export const AppRouter: React.FC = () => {
   const hasCompletedBirthData = useAuthStore((s) => s.hasCompletedBirthData);
 
   const getInitialRoute = () => {
+    if (localStorage.getItem('vpoiske_is_admin') === 'true') return "/admin";
     if (!isAuth) return "/onboarding";
     if (!hasCompletedInterview) return "/consent";
     if (!hasCompletedBirthData) return "/birth-data";
@@ -43,6 +45,12 @@ export const AppRouter: React.FC = () => {
           path="/consent"
           element={
             isAuth ? <ConsentForm /> : <Navigate to="/onboarding" replace />
+          }
+        />
+        <Route
+          path="/create-profile"
+          element={
+            isAuth ? <CreateProfile /> : <Navigate to="/onboarding" replace />
           }
         />
         <Route

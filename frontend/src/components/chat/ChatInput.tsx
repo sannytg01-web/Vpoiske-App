@@ -7,9 +7,10 @@ export interface ChatInputProps {
   disabled?: boolean;
   value?: string;
   onChange?: (val: string) => void;
+  rightAddon?: React.ReactNode;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSend, placeholder = 'Сообщение...', disabled, value, onChange }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ onSend, placeholder = 'Сообщение...', disabled, value, onChange, rightAddon }) => {
   const [internalText, setInternalText] = useState('');
   
   const text = value !== undefined ? value : internalText;
@@ -48,7 +49,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, placeholder = 'С�
             background: 'var(--bg-input)',
             borderRadius: 'var(--radius-xl)',
             border: '1px solid var(--border-subtle)',
-            padding: '12px 16px',
+            padding: `12px ${rightAddon ? '52px' : '16px'} 12px 16px`,
             color: 'var(--text-primary)',
             outline: 'none',
             resize: 'none',
@@ -56,6 +57,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, placeholder = 'С�
             maxHeight: '120px',
             fontSize: '15px',
             lineHeight: '20px',
+            overflowY: 'auto',
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -64,8 +66,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, placeholder = 'С�
             }
           }}
         />
+        {rightAddon && (
+          <div className="absolute right-2 bottom-[2px] w-[40px] h-[40px] flex items-center justify-center">
+            {rightAddon}
+          </div>
+        )}
       </div>
-      
+
       <button
         onClick={handleSend}
         disabled={!hasText || disabled}

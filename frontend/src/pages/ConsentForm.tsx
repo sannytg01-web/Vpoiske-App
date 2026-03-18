@@ -48,18 +48,32 @@ export const ConsentForm: React.FC = () => {
     try {
       if (analytics) await apiClient.post('/consent/analytics');
       if (marketing) await apiClient.post('/consent/marketing');
-      navigate('/interview');
+      navigate('/create-profile');
     } catch(e) {
-      navigate('/interview');
+      navigate('/create-profile');
     }
   };
 
   return (
     <motion.div 
       variants={pageTransition} initial="initial" animate="animate" exit="exit"
-      className="page-content px-4 py-8"
+      className="page-content px-4 py-8 relative"
     >
       <AppBackground />
+
+      {/* DEV STUB: Clear Auth Button */}
+      {(window.location.hostname === 'localhost' || window.location.hostname.includes('loca.lt')) && (
+        <button
+          onClick={() => {
+            localStorage.clear();
+            navigate('/onboarding');
+            window.location.reload();
+          }}
+          className="absolute top-4 right-4 z-50 text-[10px] text-white/40 border border-white/20 rounded-md px-2 py-1 hover:text-white"
+        >
+          [DEV] Сбросить
+        </button>
+      )}
 
       <AnimatePresence mode="wait">
         {step === 1 && (

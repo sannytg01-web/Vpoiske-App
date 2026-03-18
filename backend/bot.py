@@ -27,14 +27,10 @@ async def cmd_start(message: types.Message):
         ]]
     )
     
-    # Устанавливаем кнопку "Меню" слева от поля ввода текста,
-    # чтобы она тоже открывала Mini App
+    # Удаляем кнопку "Меню", если она была установлена ранее
     await bot.set_chat_menu_button(
         chat_id=message.chat.id,
-        menu_button=MenuButtonWebApp(
-            text="ВЛЮБВИ",
-            web_app=WebAppInfo(url=WEB_APP_URL)
-        )
+        menu_button=None
     )
 
     welcome_text = (

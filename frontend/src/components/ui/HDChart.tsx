@@ -12,24 +12,36 @@ export const HDChart: React.FC<HDChartProps> = ({ definedCenters }) => {
   const centerClass = (key: string) =>
     isDefined(key)
       ? "fill-[#4A9E7F] opacity-90 transition-all duration-500 stroke-[#7bc4a0] stroke-[2px]"
-      : "fill-transparent stroke-white/20 stroke-[1.5px] transition-all duration-500";
+      : "fill-[#142920] stroke-white/20 stroke-[1.5px] transition-all duration-500";
 
-  // Connections mapping generic connections between nodes
+  // True logical centers for perfectly straight beautiful lines
+  const centers = {
+    Head: { x: 150, y: 35 },
+    Ajna: { x: 150, y: 95 },
+    Throat: { x: 150, y: 155 },
+    Heart: { x: 210, y: 175 },
+    G: { x: 150, y: 220 },
+    Sacral: { x: 150, y: 290 },
+    Spleen: { x: 80, y: 290 },
+    SolarPlexus: { x: 220, y: 290 },
+    Root: { x: 150, y: 360 },
+  };
+
   const genericConnections = [
-    { id: "Head-Ajna", path: "M 150,55 L 150,75", c1: "Head", c2: "Ajna" },
-    { id: "Ajna-Throat", path: "M 150,115 L 150,135", c1: "Ajna", c2: "Throat" },
-    { id: "Throat-G", path: "M 150,165 L 150,195", c1: "Throat", c2: "G" },
-    { id: "Throat-Heart", path: "M 165,150 L 195,165", c1: "Throat", c2: "Heart" },
-    { id: "Heart-G", path: "M 200,200 L 175,220", c1: "Heart", c2: "G" },
-    { id: "G-Sacral", path: "M 150,245 L 150,275", c1: "G", c2: "Sacral" },
-    { id: "Sacral-Root", path: "M 150,305 L 150,345", c1: "Sacral", c2: "Root" },
-    { id: "Sacral-Spleen", path: "M 135,290 L 95,310", c1: "Sacral", c2: "Spleen" },
-    { id: "Sacral-SPlexus", path: "M 165,290 L 205,310", c1: "Sacral", c2: "SolarPlexus" },
-    { id: "Heart-SPlexus", path: "M 215,200 L 220,295", c1: "Heart", c2: "SolarPlexus" },
-    { id: "G-Spleen", path: "M 125,220 L 80,285", c1: "G", c2: "Spleen" },
-    { id: "Root-Spleen", path: "M 135,360 L 80,335", c1: "Root", c2: "Spleen" },
-    { id: "Root-SPlexus", path: "M 165,360 L 220,345", c1: "Root", c2: "SolarPlexus" },
-    { id: "Spleen-Throat", path: "M 80,285 L 135,160", c1: "Spleen", c2: "Throat" },
+    { id: "Head-Ajna", c1: "Head", c2: "Ajna" },
+    { id: "Ajna-Throat", c1: "Ajna", c2: "Throat" },
+    { id: "Throat-G", c1: "Throat", c2: "G" },
+    { id: "Throat-Heart", c1: "Throat", c2: "Heart" },
+    { id: "Heart-G", c1: "Heart", c2: "G" },
+    { id: "G-Sacral", c1: "G", c2: "Sacral" },
+    { id: "Sacral-Root", c1: "Sacral", c2: "Root" },
+    { id: "Sacral-Spleen", c1: "Sacral", c2: "Spleen" },
+    { id: "Sacral-SPlexus", c1: "Sacral", c2: "SolarPlexus" },
+    { id: "Heart-SPlexus", c1: "Heart", c2: "SolarPlexus" },
+    { id: "G-Spleen", c1: "G", c2: "Spleen" },
+    { id: "Root-Spleen", c1: "Root", c2: "Spleen" },
+    { id: "Root-SPlexus", c1: "Root", c2: "SolarPlexus" },
+    { id: "Spleen-Throat", c1: "Spleen", c2: "Throat" },
   ];
 
   const getLineClass = (c1: string, c2: string) => {
@@ -67,38 +79,43 @@ export const HDChart: React.FC<HDChartProps> = ({ definedCenters }) => {
         </defs>
 
         {/* Lines */}
-        {genericConnections.map((conn) => (
-          <path
-            key={conn.id}
-            d={conn.path}
-            className={getLineClass(conn.c1, conn.c2)}
-            fill="none"
-            style={
-              isDefined(conn.c1) && isDefined(conn.c2)
-                ? { filter: "url(#glow)" }
-                : undefined
-            }
-          />
-        ))}
+        {genericConnections.map((conn) => {
+          const p1 = centers[conn.c1 as keyof typeof centers];
+          const p2 = centers[conn.c2 as keyof typeof centers];
+          return (
+            <line
+              key={conn.id}
+              x1={p1.x}
+              y1={p1.y}
+              x2={p2.x}
+              y2={p2.y}
+              className={getLineClass(conn.c1, conn.c2)}
+              style={
+                isDefined(conn.c1) && isDefined(conn.c2)
+                  ? { filter: "url(#glow)" }
+                  : undefined
+              }
+            />
+          );
+        })}
 
         {/* Centers */}
-
         {/* Head: Triangle Up */}
-        <polygon className={centerClass("Head")} points="150,15 175,55 125,55" />
+        <polygon className={centerClass("Head")} points="150,15 174,45 126,45" />
         {/* Ajna: Triangle Down */}
-        <polygon className={centerClass("Ajna")} points="125,75 175,75 150,115" />
+        <polygon className={centerClass("Ajna")} points="126,85 174,85 150,115" />
         {/* Throat: Square */}
-        <rect className={centerClass("Throat")} x="135" y="135" width="30" height="30" rx="6" />
+        <rect className={centerClass("Throat")} x="135" y="140" width="30" height="30" rx="6" />
         {/* G-Center: Diamond */}
         <polygon className={centerClass("G")} points="150,195 175,220 150,245 125,220" />
         {/* Heart: Triangle Down */}
-        <polygon className={centerClass("Heart")} points="185,160 225,160 205,200" />
+        <polygon className={centerClass("Heart")} points="190,165 230,165 210,195" />
         {/* Sacral: Square */}
         <rect className={centerClass("Sacral")} x="135" y="275" width="30" height="30" rx="6" />
-        {/* Solar Plexus: Triangle Down */}
-        <polygon className={centerClass("SolarPlexus")} points="195,295 245,295 220,345" />
-        {/* Spleen: Triangle Up */}
-        <polygon className={centerClass("Spleen")} points="80,285 105,335 55,335" />
+        {/* Solar Plexus: Triangle Left */}
+        <polygon className={centerClass("SolarPlexus")} points="235,265 235,315 190,290" />
+        {/* Spleen: Triangle Right */}
+        <polygon className={centerClass("Spleen")} points="65,265 65,315 110,290" />
         {/* Root: Square */}
         <rect className={centerClass("Root")} x="135" y="345" width="30" height="30" rx="6" />
       </svg>

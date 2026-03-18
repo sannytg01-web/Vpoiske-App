@@ -24,7 +24,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
 from app.core.rate_limiter import limiter
-from app.routers import auth, consent, interview, geo, birth_data, matches, chat, payment, profile, gdpr, bot
+from app.routers import auth, consent, interview, geo, birth_data, matches, chat, payment, profile, gdpr, bot, admin
 
 # ─── Structlog Configuration ───────────────────────────────────
 structlog.configure(
@@ -80,8 +80,7 @@ ALLOWED_ORIGINS = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_origin_regex=r"https://.*",
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -98,6 +97,7 @@ Instrumentator(
 # ─── Routers ───────────────────────────────────────────────────
 app.include_router(auth.router)
 app.include_router(consent.router)
+app.include_router(admin.router)
 app.include_router(interview.router)
 app.include_router(geo.router)
 app.include_router(birth_data.router)

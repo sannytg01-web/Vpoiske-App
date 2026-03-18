@@ -44,3 +44,9 @@
     scrollbar-width: none; /* Firefox */
   }
 }
+
+/* Story progress bar animation */
+@keyframes story-fill {
+  from { width: 0%; }
+  to { width: 100%; }
+}

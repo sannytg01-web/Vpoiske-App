@@ -29,11 +29,15 @@ export const Profile: React.FC = () => {
   const [showPsych, setShowPsych] = useState(false);
   const [notifications, setNotifications] = useState(true);
 
-  // Mock user profile data (some fields from API, some mocked for now)
+  // Dynamic user based on phone number and locally stored name
+  const savedPhone = localStorage.getItem('vpoiske_phone') || '+7***';
+  const savedName = localStorage.getItem('vpoiske_user_name');
+  const lastFour = savedPhone.replace(/\D/g, '').slice(-4);
+
   const user = {
-    name: profile?.name || "Ольга",
-    age: profile?.birth_year ? new Date().getFullYear() - profile.birth_year : 26,
-    city: profile?.city || "Москва",
+    name: profile?.name || savedName || `Пользователь ${lastFour}`,
+    age: profile?.birth_year ? new Date().getFullYear() - profile.birth_year : null,
+    city: profile?.city || localStorage.getItem('vpoiske_user_city') || null,
     photo: profile?.photo_url || null as string | null,
     hdType: "Генератор",
     hdProfile: "4/6",
@@ -47,6 +51,8 @@ export const Profile: React.FC = () => {
     setIsEditingBio(false);
     await updateProfile({ bio: bioText });
   };
+
+  const isAdminLocal = localStorage.getItem('vpoiske_is_admin') === 'true';
 
   return (
     <motion.div
@@ -90,10 +96,11 @@ export const Profile: React.FC = () => {
           </div>
           <h2 className="text-h2 mt-4 text-white mb-1">{user.name}</h2>
           <p className="text-body text-secondary m-0">
-            {user.age} лет · {user.city}
+            {user.age ? `${user.age} лет` : ''}{user.age && user.city ? ' · ' : ''}{user.city || ''}
+            {!user.age && !user.city && <span className="text-white/30 italic">Заполните профиль</span>}
           </p>
           
-          {profile?.is_admin && (
+          {(profile?.is_admin || isAdminLocal) && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}

@@ -1,13 +1,21 @@
 import axios from 'axios';
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const getBaseUrl = () => {
+    // Check if we're on localhost
+    if (window.location.hostname === 'localhost') {
+        return 'http://localhost:8000';
+    }
+    // If not on localhost, use the production/tunnel URL
+    return 'https://vpoiske-demo-api.loca.lt';
+};
 
 export const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    baseURL: getBaseUrl(),
+    headers: {
+        'Content-Type': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true' // localtunnel bypass
+    }
 });
 
 apiClient.interceptors.request.use(

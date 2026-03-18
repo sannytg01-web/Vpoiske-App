@@ -168,8 +168,6 @@ export const Interview: React.FC = () => {
             onChange={setInputValue}
             onSend={(text) => {
               setInputValue(text);
-              // ChatInput clear itself, we just need to adapt our handleSend logic
-              // Since handleSend depends on inputValue, we pass text directly
               if (!text.trim() || isTyping) return;
               
               sendMessage(text.trim());
@@ -218,14 +216,15 @@ export const Interview: React.FC = () => {
             }} 
             placeholder="Ответить..." 
             disabled={isTyping}
+            rightAddon={
+              <button
+                onClick={toggleListening}
+                className={`w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-transparent text-white/50 hover:text-white/80'}`}
+              >
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+              </button>
+            }
           />
-          {/* VOICE INPUT BUTTON (Overlaid) */}
-          <button
-            onClick={toggleListening}
-            className={`absolute right-16 top-1/2 -translate-y-[8px] w-[44px] h-[44px] rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-transparent text-white/50 hover:text-white/80'}`}
-          >
-            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-          </button>
         </div>
       </div>
     </div>
