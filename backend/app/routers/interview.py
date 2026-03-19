@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db, get_redis
-from app.models.models import User, InterviewSession, PsychologicalProfile
+from app.models.models import User, InterviewSession, PsychologicalProfile, Profile
 from app.core.deps import get_current_user
 from app.services.ai_agent import ai_agent
 
@@ -43,11 +43,17 @@ async def start_interview(
         await db.refresh(session)
 
     # Trigger agent's first message
+    stmt_profile = select(Profile).where(Profile.user_id == user.id)
+    prof_res = await db.execute(stmt_profile)
+    profile = prof_res.scalar_one_or_none()
+    user_name = profile.name if profile and profile.name else "Пользователь"
+
     reply = await ai_agent.get_next_message(
         session_id=str(session.id), 
         user_message=None, 
         question_index=session.current_question_index, 
-        redis=redis
+        redis=redis,
+        user_name=user_name
     )
     
     return StartResponse(session_id=str(session.id), message=reply["message"])

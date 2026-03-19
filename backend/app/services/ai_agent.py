@@ -25,16 +25,28 @@ class AIAgent:
         # Dummy semaphore for local dev if LLM_MAX_CONCURRENT is set
         self.semaphore = asyncio.Semaphore(settings.llm_max_concurrent)
 
-    async def get_next_message(self, session_id: str, user_message: str | None, question_index: int, redis) -> dict:
+    async def get_next_message(self, session_id: str, user_message: str | None, question_index: int, redis, user_name: str = "Пользователь") -> dict:
         redis_key = f"interview:{session_id}"
         
         # 1. Загрузить историю
         history_data = await redis.get(redis_key)
         if history_data:
             history = json.loads(history_data)
+            # If we are just fetching the current state (e.g. reload), return the last assistant message without calling LLM
+            if not user_message:
+                for msg in reversed(history):
+                    if msg["role"] == "assistant":
+                        return {
+                            "message": msg["text"],
+                            "is_complete": question_index >= 18,
+                            "question_index": question_index,
+                            "profile_json": None
+                        }
         else:
             # 2. История пуста → создать системное сообщение
-            history = [{"role": "system", "text": INTERVIEW_PROMPT}]
+            prompt = INTERVIEW_PROMPT.replace("Привет!", f"Привет, {user_name}!")
+            prompt += f"\nВажно: Пользователя зовут {user_name}. Не спрашивай, как его/её зовут! Сразу обращайся по имени."
+            history = [{"role": "system", "text": prompt}]
 
         # 3. Добавить user_message
         if user_message:
