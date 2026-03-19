@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Send, Mic, MicOff } from "lucide-react";
+import { ChevronLeft, Send, Mic, MicOff, Sparkles } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
 import { useChatStore } from "../store/chatStore";
@@ -25,6 +25,7 @@ export const Chat: React.FC = () => {
   const userId = useAuthStore((state) => state.userId) || "mock_id"; // Now reads from authStore
 
   const [inputText, setInputText] = useState("");
+  const [showAiHints, setShowAiHints] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -276,6 +277,18 @@ export const Chat: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* AI HINT BUTTON */}
+        <button
+          onClick={() => setShowAiHints(!showAiHints)}
+          className={`p-2 rounded-full transition-all ${
+            showAiHints
+              ? "bg-[#4A9E7F]/20 text-[#4A9E7F]"
+              : "hover:bg-white/10 text-white/40 hover:text-white/80"
+          }`}
+        >
+          <Sparkles size={20} />
+        </button>
       </div>
 
       {/* MESSAGES AREA */}
@@ -323,6 +336,46 @@ export const Chat: React.FC = () => {
 
         <div ref={messagesEndRef} className="h-4" />
       </div>
+
+      {/* AI HINTS PANEL */}
+      {showAiHints && (
+        <div className="absolute bottom-[90px] left-0 w-full px-4 z-30">
+          <div className="bg-[#142920]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-xl">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={14} className="text-[#4A9E7F]" />
+              <span className="text-[11px] text-[#4A9E7F] font-bold tracking-wider uppercase">
+                Подсказки от AI
+              </span>
+            </div>
+            <div className="space-y-2">
+              {[
+                m.details?.values?.shared_values?.[0]
+                  ? `Мы оба ценим \xab${m.details.values.shared_values[0]}\xbb \u2014 расскажи, как это проявляется в твоей жизни?`
+                  : `Если бы ты мог(ла) телепортироваться куда угодно прямо сейчас, куда бы?`,
+                `Что для тебя значит \xabнайти своего человека\xbb?`,
+                m.hd_type
+                  ? `Ты ${m.hd_type} по Human Design \u2014 чувствуешь ли это в повседневной жизни?`
+                  : `Какой фильм или книга изменили твой взгляд на отношения?`,
+              ].map((hint, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setInputText(hint);
+                    setShowAiHints(false);
+                  }}
+                  className="w-full text-left bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white/80 leading-relaxed hover:bg-white/10 transition-colors"
+                >
+                  <span className="text-[#7bc4a0] font-semibold mr-1">{i + 1}.</span>
+                  {hint}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-white/30 mt-2 text-center">
+              Нажми, чтобы вставить в поле ввода
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* INPUT FIXED BOTTOM */}
       <div

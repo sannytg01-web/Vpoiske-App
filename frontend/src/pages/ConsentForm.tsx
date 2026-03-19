@@ -19,6 +19,9 @@ export const ConsentForm: React.FC = () => {
   const [agreedPDP, setAgreedPDP] = useState(false);
   const [analytics, setAnalytics] = useState(true);
   const [marketing, setMarketing] = useState(false);
+  const [approach, setApproach] = useState(
+    () => localStorage.getItem('vpoiske_approach') || ''
+  );
 
   const handleStep1 = async () => {
     if (!agreedPDP) return;
@@ -131,11 +134,66 @@ export const ConsentForm: React.FC = () => {
               <ShieldCheck size={28} color="white" />
             </div>
             
-            <h2 className="text-h2 text-white mb-6">Психологический профиль</h2>
-            
+            <h2 className="text-h2 text-white mb-2">Перед интервью</h2>
+            <p className="text-body text-secondary mb-6">Выбери подход, который тебе ближе. Это повлияет на тон AI и глубину анализа.</p>
+
+            {/* APPROACH SELECTION */}
+            <div className="space-y-3 mb-6">
+              {[
+                {
+                  id: 'scientific',
+                  emoji: '🔬',
+                  title: 'Научный подход',
+                  desc: 'Только психология: Big Five, стиль привязанности, ценности',
+                },
+                {
+                  id: 'esoteric',
+                  emoji: '✨',
+                  title: 'С Human Design',
+                  desc: 'Психология + Бодиграф + Энергетические центры',
+                },
+                {
+                  id: 'full',
+                  emoji: '🌌',
+                  title: 'Максимальная глубина',
+                  desc: 'Психология + HD + Астрология + Нумерология',
+                },
+              ].map((opt) => {
+                const selected = approach === opt.id;
+                return (
+                  <GlassCard
+                    key={opt.id}
+                    className={`p-4 cursor-pointer transition-all ${
+                      selected
+                        ? 'border-[#4A9E7F]/50 bg-[#4A9E7F]/10'
+                        : 'hover:bg-white/5'
+                    }`}
+                    onClick={() => {
+                      setApproach(opt.id);
+                      localStorage.setItem('vpoiske_approach', opt.id);
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{opt.emoji}</span>
+                      <div className="flex-1">
+                        <h3 className="text-body font-semibold text-white m-0">{opt.title}</h3>
+                        <p className="text-caption text-secondary m-0">{opt.desc}</p>
+                      </div>
+                      {selected && (
+                        <div className="w-5 h-5 rounded-full bg-[#4A9E7F] flex items-center justify-center shrink-0">
+                          <Check size={12} strokeWidth={3} className="text-white" />
+                        </div>
+                      )}
+                    </div>
+                  </GlassCard>
+                );
+              })}
+            </div>
+
+            {/* PSYCHOLOGY CONSENT */}
             <GlassCard className="p-5 mb-4">
               <p className="text-body text-white m-0">
-                Ты собираешься пройти глубокое интервью с AI-агентом. Мы проанализируем ответы для создания твоего уникального психологического слепка. Это данные <span className="text-accent-warm">специальной категории</span> (ст.10 152-ФЗ).
+                Ты собираешься пройти глубокое интервью с AI-агентом. Мы проанализируем ответы для создания твоего уникального психологического профиля. Это данные <span className="text-accent-warm">специальной категории</span> (ст.10 152-ФЗ).
               </p>
             </GlassCard>
 
@@ -150,7 +208,15 @@ export const ConsentForm: React.FC = () => {
             </GlassCard>
 
             <div className="mt-auto flex flex-col space-y-3">
-              <Button variant="primary" onClick={() => handleStep2(true)}>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (!localStorage.getItem('vpoiske_approach')) {
+                    localStorage.setItem('vpoiske_approach', 'esoteric');
+                  }
+                  handleStep2(true);
+                }}
+              >
                 Даю согласие
               </Button>
               <Button variant="danger" onClick={() => handleStep2(false)}>
