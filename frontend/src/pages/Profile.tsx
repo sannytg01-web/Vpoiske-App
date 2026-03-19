@@ -7,6 +7,8 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronLeft,
+  ShieldCheck,
+  Fingerprint,
 } from "lucide-react";
 import { tgAlert } from "../utils/telegram";
 
@@ -16,6 +18,11 @@ import { Button } from "../components/ui/Button";
 import { pageTransition } from "../utils/animations";
 import { useAuthStore } from "../store/authStore";
 import { useProfileStore } from "../store/profileStore";
+import {
+  usePsychProfileStore,
+  attachmentLabels,
+  valueLabels,
+} from "../store/psychProfileStore";
 
 export const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +35,7 @@ export const Profile: React.FC = () => {
   );
   const [showPsych, setShowPsych] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const psychProfile = usePsychProfileStore((s) => s.profile);
 
   // Dynamic user based on phone number and locally stored name
   const savedPhone = localStorage.getItem('vpoiske_phone') || '+7***';
@@ -42,9 +50,10 @@ export const Profile: React.FC = () => {
     hdType: "Генератор",
     hdProfile: "4/6",
     hdAuthority: "Сакральный",
-    psychNotes:
-      "Надёжный тип привязанности, высокий уровень экстраверсии, открытость новому опыту.",
-    values: ["Свобода", "Развитие", "Доверие", "Любовь к природе", "Эмпатия"],
+    psychNotes: psychProfile
+      ? `${attachmentLabels[psychProfile.attachment_style] || psychProfile.attachment_style} тип привязанности. ${psychProfile.profile_notes || ''}`
+      : "Пройдите интервью, чтобы получить психологический портрет.",
+    values: psychProfile?.top_values?.map(v => valueLabels[v.toLowerCase()] || v) || ["Пройдите интервью"],
   };
 
   const handleSaveBio = async () => {
@@ -102,6 +111,12 @@ export const Profile: React.FC = () => {
             {user.age ? `${user.age} лет` : ''}{user.age && user.city ? ' · ' : ''}{user.city || ''}
             {!user.age && !user.city && <span className="text-white/30 italic">Заполните профиль</span>}
           </p>
+
+          {/* Anonymous badge */}
+          <div className="flex items-center gap-1.5 mt-2 bg-white/5 border border-white/10 rounded-full px-3 py-1">
+            <ShieldCheck size={12} className="text-[#4A9E7F]" />
+            <span className="text-[10px] text-white/50 font-medium">Ваше фото анонимно до взаимного обмена</span>
+          </div>
           
           {(profile?.is_admin || isAdminLocal) && (
             <motion.div
@@ -193,6 +208,26 @@ export const Profile: React.FC = () => {
             }
           >
             Изменить данные рождения
+          </Button>
+        </GlassCard>
+
+        {/* SELF PASSPORT LINK */}
+        <GlassCard className="p-5 mb-4">
+          <div className="flex items-center gap-3 mb-3 pb-3 border-b border-white/10">
+            <Fingerprint size={20} className="text-[#4A9E7F]" />
+            <h3 className="text-body font-semibold tracking-wider text-white m-0">
+              ПАСПОРТ СЕБЯ
+            </h3>
+          </div>
+          <p className="text-caption text-secondary mb-3">
+            Твой полный профиль: Human Design + Психология + Ценности
+          </p>
+          <Button
+            variant="secondary"
+            className="w-full py-2.5 text-sm bg-white/5"
+            onClick={() => navigate('/hd-card')}
+          >
+            Открыть паспорт →
           </Button>
         </GlassCard>
 

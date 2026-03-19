@@ -130,6 +130,17 @@ export const Interview: React.FC = () => {
         </div>
       </div>
 
+      {/* QUESTION COUNTER */}
+      <div className="flex-shrink-0 z-10 w-full flex items-center justify-center py-2 bg-black/10 backdrop-blur-sm border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-white/40 tracking-wider uppercase">Вопрос</span>
+          <span className="bg-white/10 border border-white/15 rounded-full px-3 py-0.5 text-sm font-bold text-white tabular-nums">
+            {Math.min(currentQuestionIndex + 1, 18)}
+          </span>
+          <span className="text-xs font-semibold text-white/40 tracking-wider uppercase">из 18</span>
+        </div>
+      </div>
+
       {/* MESSAGES */}
       <div
         className="flex-1 overflow-y-auto px-4 pt-6 pb-28 flex flex-col relative"
