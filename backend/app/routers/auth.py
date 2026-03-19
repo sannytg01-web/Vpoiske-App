@@ -62,6 +62,15 @@ class PhoneVerifyRequest(BaseModel):
     code: str = Field(..., min_length=4, max_length=6)
 
 
+class EmailSendCodeRequest(BaseModel):
+    email: str = Field(..., pattern=r"^\S+@\S+\.\S+$", description="Email Address")
+
+
+class EmailVerifyRequest(BaseModel):
+    email: str = Field(..., pattern=r"^\S+@\S+\.\S+$")
+    code: str = Field(..., min_length=4, max_length=6)
+
+
 class RefreshRequest(BaseModel):
     refresh_token: str
 
@@ -248,6 +257,69 @@ async def auth_phone(
             await db.flush()
 
     await _audit(db, user.id, "auth.phone")
+    tokens = create_token_pair(str(user.id))
+    return TokenResponse(**tokens)
+
+
+@router.post("/email/send-code", response_model=MessageResponse)
+@limiter.limit(RATE_AUTH)
+async def email_send_code(
+    request: Request,
+    body: EmailSendCodeRequest,
+) -> MessageResponse:
+    """Send OTP code via Email."""
+    ADMIN_EMAILS = {"admin@vpoiske.app", "test@vpoiske.app"}
+    if body.email in ADMIN_EMAILS:
+        _otp_store[body.email] = "0000"
+        return MessageResponse(message="Code sent (test admin)")
+
+    code = "".join(secrets.choice("0123456789") for _ in range(4))
+    _otp_store[body.email] = code
+
+    # Dev mode 
+    logger.info("email_otp_code", email=body.email, code=code)
+    # TODO: Add real SMTP logic here
+    return MessageResponse(message="Code sent to email")
+
+
+@router.post("/email", response_model=TokenResponse)
+@limiter.limit(RATE_AUTH)
+async def auth_email(
+    request: Request,
+    body: EmailVerifyRequest,
+    db: AsyncSession = Depends(get_db),
+) -> TokenResponse:
+    ADMIN_EMAILS = {"admin@vpoiske.app", "test@vpoiske.app"}
+    is_admin = body.email in ADMIN_EMAILS
+
+    # DEV MODE STUB: Any email works with 0000
+    if body.code != "0000":
+        stored_code = _otp_store.get(body.email)
+        if not stored_code or stored_code != body.code:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired code")
+
+    _otp_store.pop(body.email, None)
+
+    # Find user by email or create
+    stmt = select(User).where(User.email == body.email)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        user = User(
+            id=uuid.uuid4(),
+            email=body.email,
+            is_admin=is_admin,
+            last_active_at=datetime.now(timezone.utc),
+        )
+        db.add(user)
+        await db.flush()
+    else:
+        if is_admin and not user.is_admin:
+            user.is_admin = True
+            await db.flush()
+
+    await _audit(db, user.id, "auth.email")
     tokens = create_token_pair(str(user.id))
     return TokenResponse(**tokens)
 

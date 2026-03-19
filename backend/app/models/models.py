@@ -43,6 +43,7 @@ class User(Base):
     max_id: Mapped[int | None] = mapped_column(BigInteger, unique=True, nullable=True, index=True)
     phone_encrypted: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     phone_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_active_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
