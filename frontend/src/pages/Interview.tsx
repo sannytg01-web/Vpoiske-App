@@ -5,6 +5,7 @@ import { Mic, MicOff } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
 import { useInterviewStore } from "../store/interviewStore";
+import { usePsychProfileStore } from "../store/psychProfileStore";
 import { apiClient } from "../utils/apiClient";
 import { tgHaptic } from "../utils/telegram";
 import { maxHaptic } from "../utils/maxBridge";
@@ -32,6 +33,7 @@ export const Interview: React.FC = () => {
 
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const setPsychProfile = usePsychProfileStore((s) => s.setProfile);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -200,6 +202,10 @@ export const Interview: React.FC = () => {
                 });
 
                 if (res.data.is_complete) {
+                  // Save psychological profile if returned by API
+                  if (res.data.profile_json) {
+                    setPsychProfile(res.data.profile_json);
+                  }
                   completeInterview();
                 }
               }).catch((e) => {
@@ -235,6 +241,27 @@ export const Interview: React.FC = () => {
                     text: replyText,
                   });
                   if (currentQuestionIndex >= 17) {
+                    // Generate demo psych profile for offline mode
+                    setPsychProfile({
+                      openness: 0.72,
+                      conscientiousness: 0.65,
+                      extraversion: 0.58,
+                      agreeableness: 0.81,
+                      neuroticism: 0.35,
+                      attachment_style: 'secure',
+                      energy_type: 'variable',
+                      conflict_style: 'healthy_boundary',
+                      top_values: ['свобода', 'честность', 'глубина', 'развитие', 'принятие'],
+                      shadow_patterns: ['перфекционизм', 'страх конфликта'],
+                      refused_questions: [],
+                      confidence_score: 0.78,
+                      profile_notes: 'Ты человек, который ценит глубину и подлинность в отношениях. Тебе важно чувствовать себя свободно, но при этом ты готов(а) вкладываться в того, кому доверяешь. Ты умеешь слышать и держать баланс между близостью и личным пространством.',
+                      bio_variants: {
+                        light: 'Люблю походы, глубокие разговоры и неожиданные путешествия. Ищу человека, с которым можно молчать и смеяться.',
+                        deep: 'Ценю подлинность и глубину. Верю, что настоящая близость рождается из честности и готовности быть уязвимым.',
+                        warm: 'Человек, который умеет слушать тишину. Ищу не идеального, а настоящего.',
+                      },
+                    });
                     completeInterview();
                   } else {
                     setQuestionIndex(currentQuestionIndex + 1);

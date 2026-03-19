@@ -8,6 +8,10 @@ import {
   AlertTriangle,
   Lock,
   ChevronLeft,
+  Sparkles,
+  ShieldCheck,
+  MessageCircle,
+  Zap,
 } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
@@ -17,6 +21,105 @@ import { pageTransition } from "../utils/animations";
 import { useMatchStore } from "../store/matchStore";
 import { useAuthStore } from "../store/authStore";
 
+// ──── Helper: generate match insights based on scores ────
+const generateWhyMatched = (d: any) => {
+  const reasons: string[] = [];
+
+  if (d?.hd_score >= 85)
+    reasons.push(
+      `Ваши энергетические типы создают мощную синергию — вы дополняете друг друга на глубинном уровне.`
+    );
+  else if (d?.hd_score >= 70)
+    reasons.push(
+      `По Human Design ваши типы хорошо совместимы — есть потенциал для гармоничного взаимодействия.`
+    );
+
+  if (d?.hd?.em_bonus > 0)
+    reasons.push(
+      `У вас есть электромагнитные связи — вас будет тянуть друг к другу как магнит. Это редкое совпадение.`
+    );
+
+  if (d?.psychology_score >= 85)
+    reasons.push(
+      `Ваши психологические профили очень близки — вы будете интуитивно понимать друг друга.`
+    );
+  else if (d?.psychology_score >= 70)
+    reasons.push(
+      `Хорошая психологическая совместимость — схожие модели поведения в отношениях.`
+    );
+
+  if (d?.values_score >= 90)
+    reasons.push(
+      `Почти полное совпадение ключевых ценностей — это фундамент для долгосрочных отношений.`
+    );
+  else if (d?.values_score >= 70)
+    reasons.push(
+      `У вас есть важные общие ценности, на которых можно строить взаимопонимание.`
+    );
+
+  if (reasons.length === 0)
+    reasons.push(
+      `Наш алгоритм нашёл точки пересечения в энергетике, психологии и ценностях.`
+    );
+
+  return reasons;
+};
+
+const generateGrowthAreas = (d: any) => {
+  const areas: { text: string; severity: "info" | "warn" }[] = [];
+
+  if (d?.psych?.attachment < 0)
+    areas.push({
+      text: "Разные стили привязанности — важно давать друг другу время и не торопить сближение.",
+      severity: "warn",
+    });
+
+  if (d?.psych?.neuro_diff && Math.abs(d.psych.neuro_diff) > 5)
+    areas.push({
+      text: "Разный уровень эмоциональности — один из вас может быть спокойнее, другой — интенсивнее. Ключ: терпение.",
+      severity: "info",
+    });
+
+  if (d?.hd?.em_bonus === 0 && d?.hd_score < 80)
+    areas.push({
+      text: "Нет электромагнитных связей — первичная «искра» может быть не мгновенной, но глубина придёт с общением.",
+      severity: "info",
+    });
+
+  if (d?.psych?.conflict && d.psych.conflict < 0)
+    areas.push({
+      text: "Разные стили конфликта — обсудите заранее, как вы хотите решать разногласия.",
+      severity: "warn",
+    });
+
+  if (areas.length === 0)
+    areas.push({
+      text: "Серьёзных зон напряжения не обнаружено — отличная база для знакомства!",
+      severity: "info",
+    });
+
+  return areas;
+};
+
+// Ice-breaker questions
+const generateIcebreakers = (hdType: string, sharedValues: string[]) => {
+  const baseQuestions = [
+    `Если бы ты мог(ла) телепортироваться в любое место прямо сейчас — куда бы отправился(ась)?`,
+    `Что для тебя значит «найти своего человека»?`,
+    `Какой фильм или книга изменили твой взгляд на отношения?`,
+  ];
+
+  if (sharedValues.length > 0) {
+    baseQuestions[0] = `Мы оба ценим «${sharedValues[0]}» — расскажи, как это проявляется в твоей жизни?`;
+  }
+
+  if (hdType) {
+    baseQuestions[2] = `Ты ${hdType} по Human Design — чувствуешь ли ты это в повседневной жизни?`;
+  }
+
+  return baseQuestions;
+};
+
 export const MatchDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -25,6 +128,7 @@ export const MatchDetail: React.FC = () => {
 
   const [processing, setProcessing] = useState(false);
   const [authError, setAuthError] = useState(false);
+  const [showIcebreakers, setShowIcebreakers] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -43,9 +147,6 @@ export const MatchDetail: React.FC = () => {
     if (!selectedMatch) return;
     setProcessing(true);
     try {
-      // Usually this requires real premium, but we mock it. By spec API throws 402 if not premium.
-      // But we will navigate to paywall if we know client-side.
-      // Allow free users to chat with unlocked profiles (first 3)
       if (!isPremium && selectedMatch.locked) {
         navigate("/paywall");
         return;
@@ -96,6 +197,13 @@ export const MatchDetail: React.FC = () => {
   const m = selectedMatch;
   const d = m.details;
 
+  const whyMatched = generateWhyMatched(d);
+  const growthAreas = generateGrowthAreas(d);
+  const icebreakers = generateIcebreakers(
+    m.hd_type,
+    d?.values?.shared_values || []
+  );
+
   return (
     <motion.div
       variants={pageTransition}
@@ -132,7 +240,10 @@ export const MatchDetail: React.FC = () => {
             <div className="flex flex-col items-center">
               <div className="w-[70px] h-[70px] rounded-full border-2 border-accent-warm/50 bg-gradient-to-br from-accent-warm to-accent-warm/40 flex items-center justify-center shadow-xl shadow-accent-warm/20 relative z-10 overflow-hidden">
                 {m.photo ? (
-                  <img src={m.photo} className="w-full h-full object-cover" />
+                  <img
+                    src={m.photo}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <span className="text-2xl text-white font-serif">
                     {m.name.charAt(0)}
@@ -160,7 +271,8 @@ export const MatchDetail: React.FC = () => {
             <h1
               className="text-h1 m-0"
               style={{
-                background: "-webkit-linear-gradient(160deg, #Ffffff, #E5B079)",
+                background:
+                  "-webkit-linear-gradient(160deg, #Ffffff, #E5B079)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -169,10 +281,18 @@ export const MatchDetail: React.FC = () => {
             </h1>
           </div>
 
+          {/* Anonymous notice */}
+          <div className="flex items-center gap-1.5 mt-3 bg-white/5 border border-white/10 rounded-full px-3 py-1">
+            <ShieldCheck size={12} className="text-[#4A9E7F]" />
+            <span className="text-[10px] text-white/50 font-medium">
+              Фото скрыто до взаимного обмена
+            </span>
+          </div>
+
           <p className="text-caption text-secondary mt-2 text-center w-full">
-            Мы проанализировали всё: от даты
+            Мы проанализировали энергетику,
             <br />
-            рождения до глубоких ценностей.
+            психологию и ценности.
           </p>
         </div>
 
@@ -195,7 +315,7 @@ export const MatchDetail: React.FC = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
               <div className="bg-[#B0BEC5]/10 p-2 rounded-lg">
                 <Brain className="text-[#B0BEC5]" size={18} />
@@ -209,7 +329,7 @@ export const MatchDetail: React.FC = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl p-3 px-4 flex items-center space-x-3 backdrop-blur-md">
               <div className="bg-accent-warm/10 p-2 rounded-lg">
                 <Heart className="text-accent-warm" size={18} />
@@ -226,6 +346,28 @@ export const MatchDetail: React.FC = () => {
           </div>
         </div>
 
+        {/* ═══════ WHY YOU MATCHED ═══════ */}
+        <GlassCard className="p-5 mb-4">
+          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/10">
+            <Sparkles size={18} className="text-[#4A9E7F]" />
+            <h3 className="text-body font-semibold tracking-wider text-white m-0">
+              ПОЧЕМУ ВЫ СОВПАЛИ
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {whyMatched.map((reason, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-[#4A9E7F]/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <Zap size={12} className="text-[#4A9E7F]" />
+                </div>
+                <p className="text-body text-secondary leading-relaxed m-0">
+                  {reason}
+                </p>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
         {/* DETAILED CARDS */}
         <div className="space-y-4">
           {/* HD CARD */}
@@ -237,9 +379,17 @@ export const MatchDetail: React.FC = () => {
               </h3>
             </div>
             <p className="text-body text-secondary leading-relaxed mb-2">
-              Ваши типы ({m.hd_type} и Ваш) создают хорошую синергию.
+              {m.name} — {m.hd_type}.{" "}
+              {d?.hd_score >= 85
+                ? "Ваши типы создают мощную энергетическую синергию."
+                : d?.hd_score >= 70
+                ? "Хорошая совместимость типов с потенциалом для роста."
+                : "Разные типы — но именно непохожесть создаёт притяжение."}
               {d?.hd?.em_bonus > 0
-                ? " У вас есть мощные электромагнитные связи — вас будет тянуть друг к другу как магнит."
+                ? " Электромагнитные связи усиливают взаимное притяжение."
+                : ""}
+              {d?.hd?.channel_bonus > 0
+                ? ` Совпадение ${d.hd.channel_bonus / 5} активных каналов — редкое явление.`
                 : ""}
             </p>
           </GlassCard>
@@ -253,8 +403,11 @@ export const MatchDetail: React.FC = () => {
               </h3>
             </div>
             <p className="text-body text-secondary leading-relaxed mb-3">
-              Отличная совместимость типов привязанности. Плюс, совпадающие
-              уровни экстраверсии помогут легко планировать досуг.
+              {d?.psychology_score >= 85
+                ? "Отличная совместимость психологических профилей. Вы интуитивно понимаете мотивы друг друга."
+                : d?.psychology_score >= 70
+                ? "Хорошая психологическая совместимость. Есть основа для глубокого взаимопонимания."
+                : "Разные психологические стили — но это создаёт возможности для роста обоих."}
             </p>
             {d?.psych?.attachment < 0 && (
               <div className="bg-accent-warning/10 p-3 rounded-xl border border-accent-warning/20 flex space-x-3 items-start mt-3">
@@ -263,8 +416,8 @@ export const MatchDetail: React.FC = () => {
                   size={18}
                 />
                 <span className="text-caption text-secondary">
-                  Могут быть сложности в сближении из-за разных стилей базового
-                  доверия. Потребуется открытость и терпение.
+                  Разные стили привязанности — важно давать друг другу
+                  время и обсуждать потребности открыто.
                 </span>
               </div>
             )}
@@ -275,17 +428,19 @@ export const MatchDetail: React.FC = () => {
             <div className="flex items-center space-x-3 mb-3 border-b border-white/10 pb-3">
               <Heart className="text-accent-warm" size={20} />
               <h3 className="text-body font-semibold tracking-wider text-white">
-                ЦЕННОСТИ И ЖИЗНЬ
+                ОБЩИЕ ЦЕННОСТИ
               </h3>
             </div>
             <p className="text-body text-secondary mb-3">
-              У вас есть важные точки пересечения:
+              {d?.values?.shared_values?.length >= 3
+                ? "У вас сильный фундамент общих ценностей:"
+                : "У вас есть важные точки пересечения:"}
             </p>
             <div className="flex flex-wrap gap-2">
               {d?.values?.shared_values?.map((v: string) => (
                 <span
                   key={v}
-                  className="bg-accent-warm/10 text-accent-warm px-3 py-1 rounded-full text-caption font-medium border border-accent-warm/20"
+                  className="bg-accent-warm/10 text-accent-warm px-3 py-1.5 rounded-full text-xs font-medium border border-accent-warm/20"
                 >
                   {v}
                 </span>
@@ -293,6 +448,89 @@ export const MatchDetail: React.FC = () => {
             </div>
           </GlassCard>
         </div>
+
+        {/* ═══════ GROWTH AREAS ═══════ */}
+        <GlassCard className="p-5 mt-4">
+          <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/10">
+            <AlertTriangle size={18} className="text-accent-warning" />
+            <h3 className="text-body font-semibold tracking-wider text-white m-0">
+              НА ЧТО ОБРАТИТЬ ВНИМАНИЕ
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {growthAreas.map((area, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                    area.severity === "warn"
+                      ? "bg-accent-warning/15"
+                      : "bg-[#4A9E7F]/15"
+                  }`}
+                >
+                  {area.severity === "warn" ? (
+                    <AlertTriangle
+                      size={12}
+                      className="text-accent-warning"
+                    />
+                  ) : (
+                    <Sparkles size={12} className="text-[#4A9E7F]" />
+                  )}
+                </div>
+                <p className="text-body text-secondary leading-relaxed m-0">
+                  {area.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
+        {/* ═══════ ICEBREAKER QUESTIONS ═══════ */}
+        <GlassCard className="p-5 mt-4 mb-4">
+          <button
+            onClick={() => setShowIcebreakers(!showIcebreakers)}
+            className="w-full flex items-center justify-between outline-none"
+          >
+            <div className="flex items-center gap-2">
+              <MessageCircle size={18} className="text-[#7bc4a0]" />
+              <h3 className="text-body font-semibold tracking-wider text-white m-0">
+                ШПАРГАЛКА ДЛЯ ПЕРВОГО СООБЩЕНИЯ
+              </h3>
+            </div>
+            <Sparkles size={16} className="text-white/30" />
+          </button>
+
+          {showIcebreakers && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <p className="text-caption text-secondary mt-3 mb-3">
+                AI подобрал вопросы специально для вашей пары:
+              </p>
+              <div className="space-y-2">
+                {icebreakers.map((q, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/5 border border-white/10 rounded-xl p-3 text-body text-white/80 leading-relaxed cursor-pointer hover:bg-white/8 transition-colors"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(q);
+                    }}
+                  >
+                    <span className="text-[#7bc4a0] font-semibold mr-2">
+                      {i + 1}.
+                    </span>
+                    {q}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-white/30 mt-2 text-center">
+                Нажми на вопрос, чтобы скопировать
+              </p>
+            </motion.div>
+          )}
+        </GlassCard>
       </div>
 
       {/* FLOATING ACTION DOCK */}
