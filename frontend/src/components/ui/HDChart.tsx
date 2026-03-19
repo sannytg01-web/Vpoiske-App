@@ -102,22 +102,39 @@ export const HDChart: React.FC<HDChartProps> = ({ definedCenters }) => {
         {/* Centers */}
         {/* Head: Triangle Up */}
         <polygon className={centerClass("Head")} points="150,15 174,45 126,45" />
+        <text x="150" y="55" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Вдохновение</text>
+
         {/* Ajna: Triangle Down */}
         <polygon className={centerClass("Ajna")} points="126,85 174,85 150,115" />
+        <text x="150" y="125" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Мышление</text>
+
         {/* Throat: Square */}
         <rect className={centerClass("Throat")} x="135" y="140" width="30" height="30" rx="6" />
+        <text x="150" y="180" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Выражение</text>
+
         {/* G-Center: Diamond */}
         <polygon className={centerClass("G")} points="150,195 175,220 150,245 125,220" />
+        <text x="150" y="255" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Идентичность</text>
+
         {/* Heart: Triangle Down */}
         <polygon className={centerClass("Heart")} points="190,165 230,165 210,195" />
+        <text x="210" y="205" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Сила воли</text>
+
         {/* Sacral: Square */}
         <rect className={centerClass("Sacral")} x="135" y="275" width="30" height="30" rx="6" />
+        <text x="150" y="315" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Энергия</text>
+
         {/* Solar Plexus: Triangle Left */}
         <polygon className={centerClass("SolarPlexus")} points="235,265 235,315 190,290" />
+        <text x="212" y="325" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Эмоции</text>
+
         {/* Spleen: Triangle Right */}
         <polygon className={centerClass("Spleen")} points="65,265 65,315 110,290" />
+        <text x="87" y="325" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Интуиция</text>
+
         {/* Root: Square */}
         <rect className={centerClass("Root")} x="135" y="345" width="30" height="30" rx="6" />
+        <text x="150" y="385" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Драйв</text>
       </svg>
     </div>
   );

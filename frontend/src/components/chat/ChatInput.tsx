@@ -67,7 +67,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend, placeholder = 'Ð¡Ð
           }}
         />
         {rightAddon && (
-          <div className="absolute right-2 bottom-[2px] w-[40px] h-[40px] flex items-center justify-center">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 w-[40px] h-[40px] flex items-center justify-center">
             {rightAddon}
           </div>
         )}
