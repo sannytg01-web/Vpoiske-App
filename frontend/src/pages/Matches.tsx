@@ -145,20 +145,15 @@ export const Matches: React.FC = () => {
             animate="visible"
             variants={{
               hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+              visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
             }}
-            className="grid grid-cols-2 gap-3 pb-[80px] mt-6"
+            className="flex flex-col gap-4 pb-[80px] mt-6"
           >
             <AnimatePresence>
               {displayMatches.map((m, idx) => (
                 <MatchCard
                   key={m.id}
-                  name={m.name}
-                  age={m.age}
-                  photoUrl={m.photo || ""}
-                  compatibilityScore={m.score}
-                  matchReason={m.match_reason}
-                  isLocked={m.locked}
+                  match={m}
                   delayIndex={idx}
                   onClick={() => navigate(`/matches/${m.id}`)}
                   onUnlockClick={() => navigate("/paywall")}

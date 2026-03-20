@@ -1,32 +1,26 @@
 import React from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, Zap, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cardVariants } from '../../utils/animations';
+import type { MatchProfile } from '../../store/matchStore';
 
 export interface MatchCardProps {
-  name: string;
-  age: number;
-  photoUrl: string;
-  compatibilityScore: number;
-  matchReason?: string;
-  isLocked?: boolean;
-  onUnlockClick?: () => void;
+  match: MatchProfile;
   onClick?: () => void;
+  onUnlockClick?: () => void;
   delayIndex?: number;
 }
 
 export const MatchCard: React.FC<MatchCardProps> = ({ 
-  name, 
-  age, 
-  photoUrl, 
-  compatibilityScore, 
-  matchReason,
-  isLocked = false, 
+  match,
   onUnlockClick,
   onClick,
   delayIndex = 0
 }) => {
-  const hasPhoto = !!photoUrl && photoUrl.trim() !== "";
+  const isLocked = match.locked;
+
+  // Helper to extract values
+  const sharedValues = match.details?.values?.shared_values || [];
 
   return (
     <motion.div 
@@ -34,95 +28,96 @@ export const MatchCard: React.FC<MatchCardProps> = ({
       custom={delayIndex}
       initial="hidden"
       animate="visible"
-      className="relative overflow-hidden w-full cursor-pointer"
+      className="relative overflow-hidden w-full cursor-pointer flex flex-col p-5"
       onClick={isLocked ? onUnlockClick : onClick}
       style={{
-        aspectRatio: '3/4',
         borderRadius: 'var(--radius-lg)',
-        background: 'var(--bg-secondary)',
+        background: 'var(--bg-card)',
         boxShadow: 'var(--shadow-card)',
+        border: '1px solid var(--border-card)',
+        backdropFilter: 'var(--blur-card)',
       }}
     >
-      {/* Background Image or Placeholder */}
-      {hasPhoto ? (
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url(${photoUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: '100%',
-          }}
-        />
-      ) : (
-          <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center pointer-events-none p-4"
-          style={{
-            background: 'linear-gradient(135deg, #1c3d33 0%, #0d1f1a 100%)',
-          }}
-        >
-          <span className="text-[72px] font-thin text-white/10 uppercase" style={{ fontFamily: "Inter", transform: "translateY(-10px)" }}>
-            {name.charAt(0)}
-          </span>
-          {matchReason && !hasPhoto && (
-            <p className="text-[11px] leading-tight text-white/70 text-center font-medium line-clamp-4 absolute bottom-[80px] px-4 opacity-90">
-              {matchReason}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Gradient Overlay bottom to top */}
-      <div 
-        className="absolute inset-x-0 bottom-0 top-1/3 pointer-events-none"
-        style={{
-          background: 'linear-gradient(180deg, transparent 0%, rgba(13, 31, 26, 0.6) 40%, rgba(13, 31, 26, 1) 100%)',
-        }}
-      />
-
       {/* Compatibility Badge top-left */}
-      {!isLocked && (
-        <div 
-          className="absolute top-3 left-3 text-label text-white flex items-center justify-center font-bold"
-          style={{
-            background: 'var(--gradient-accent)',
-            borderRadius: 'var(--radius-pill)',
-            padding: '4px 8px',
-            fontSize: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-          }}
-        >
-          {compatibilityScore}% совпадение
-        </div>
-      )}
-
-      {/* Lock Overlay */}
-      {isLocked && (
-        <div 
-          className="absolute inset-0 flex flex-col items-center justify-center"
-          style={{
-            background: 'rgba(13, 31, 26, 0.5)',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          <div 
-            className="p-3 mb-2 rounded-full"
-            style={{ background: 'var(--gradient-warm)', boxShadow: '0 4px 16px rgba(196, 149, 106, 0.4)' }}
-          >
-            <Lock color="white" size={24} />
-          </div>
-          <p className="text-body text-white font-semibold">Скрыто</p>
-        </div>
-      )}
-
-      {/* Content Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 pb-5 flex flex-col z-20">
-        <h2 className="text-[17px] font-semibold tracking-wide text-white m-0 drop-shadow-md pb-1">{name}, {age}</h2>
-        {matchReason && hasPhoto && (
-           <p className="text-[11px] leading-tight text-white/80 m-0 line-clamp-2">
-             {matchReason}
-           </p>
-        )}
+      <div className="flex justify-between items-start mb-4">
+         <div>
+            <h2 className="text-[19px] font-bold tracking-wide text-white m-0 drop-shadow-md">
+              {isLocked ? "Анонимный Профиль" : `${match.name}, ${match.age}`}
+            </h2>
+            <p className="text-xs text-[#00FF88]/70 font-medium tracking-widest uppercase mt-1">
+              {match.hd_type}
+            </p>
+         </div>
+         {!isLocked && (
+            <div 
+              className="text-label text-[#00FF88] flex items-center justify-center font-extrabold shadow-lg"
+              style={{
+                background: 'rgba(0, 255, 136, 0.1)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '13px',
+                border: '1px solid rgba(0, 255, 136, 0.2)'
+              }}
+            >
+              {match.score}% Мэтч
+            </div>
+         )}
       </div>
+
+      {isLocked ? (
+        <div className="flex flex-col items-center justify-center py-6">
+          <div className="p-4 mb-4 rounded-full" style={{ background: 'var(--gradient-warm)', boxShadow: '0 4px 16px rgba(196, 149, 106, 0.4)' }}>
+            <Lock color="white" size={28} />
+          </div>
+          <p className="text-body text-white font-semibold mb-2">Профиль скрыт</p>
+          <p className="text-xs text-white/50 text-center max-w-[200px]">
+            Оплатите премиум доступ, чтобы увидеть детальную совместимость.
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col space-y-4">
+            
+            {/* Short Match Reason AI resume */}
+            {match.match_reason && (
+              <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                 <p className="text-sm leading-relaxed text-white/90 italic m-0">
+                   «{match.match_reason}»
+                 </p>
+              </div>
+            )}
+
+            {/* Matrix details */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-black/20 rounded-lg p-3 flex flex-col">
+                 <div className="flex items-center text-[#4A9E7F] mb-1">
+                   <Heart size={14} className="mr-1.5" />
+                   <span className="text-[10px] font-bold uppercase tracking-wider">Ценности</span>
+                 </div>
+                 <p className="text-[12px] text-white/80 font-medium leading-tight">
+                   {sharedValues.length > 0 ? sharedValues.slice(0,3).join(", ") : "Общие интересы"}
+                 </p>
+              </div>
+
+              <div className="bg-black/20 rounded-lg p-3 flex flex-col">
+                 <div className="flex items-center text-[#D4AF37] mb-1">
+                   <Zap size={14} className="mr-1.5" />
+                   <span className="text-[10px] font-bold uppercase tracking-wider">Синергия</span>
+                 </div>
+                 <p className="text-[12px] text-white/80 font-medium leading-tight line-clamp-2">
+                   Взаимное усиление энергии
+                 </p>
+              </div>
+            </div>
+
+            <button 
+               className="mt-2 w-full py-3 rounded-xl font-bold flex items-center justify-center transition-opacity hover:opacity-90 active:scale-[0.98]"
+               style={{ background: 'var(--gradient-accent)', color: 'var(--text-on-accent)' }}
+               onClick={(e) => { e.stopPropagation(); if(onClick) onClick(); }}
+            >
+               Раскрыть профиль
+            </button>
+        </div>
+      )}
     </motion.div>
   );
 };
