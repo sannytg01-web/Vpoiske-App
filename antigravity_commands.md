@@ -7,23 +7,23 @@
 ---
 
 ## 1. Запуск Локального Бэкенда (FastAPI)
-Откройте новый терминал и выполните:
+Откройте новый терминал и выполните (копируйте всю строку целиком):
 ```bat
-cd "d:\Vpoiske App\backend" ; .\venv\Scripts\activate ; uvicorn app.main:app --host 0.0.0.0 --port 8000
+cd "backend" ; .\venv\Scripts\activate ; uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 Если нужно будет перезапустить бэкенд, просто нажмите `Ctrl+C` и повторите эту команду.
 
 ## 2. Запуск Локального Туннеля для Бэкенда (API)
 Чтобы фронтенд с Netlify мог достучаться до вашего локального компьютера, нужен туннель:
 ```bat
-cd "d:\Vpoiske App\backend" ; npx localtunnel --port 8000 --subdomain vlubvi-api
+cd "backend" ; npx localtunnel --port 8000 --subdomain vlubvi-api
 ```
 *(Ваш API теперь всегда будет доступен по адресу `https://vlubvi-api.loca.lt`)*
 
 ## 3. Запуск Телеграм-бота
 Локальный запуск бота, который генерирует кнопку для MiniApp:
 ```bat
-cd "d:\Vpoiske App\backend" ; .\venv\Scripts\activate ; python bot.py
+cd "backend" ; .\venv\Scripts\activate ; python bot.py
 ```
 
 ## 4. Сборка и Деплой Frontend на Netlify

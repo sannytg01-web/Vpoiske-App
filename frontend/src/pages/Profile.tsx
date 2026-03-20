@@ -82,7 +82,7 @@ export const Profile: React.FC = () => {
         style={{ paddingTop: "calc(16px + var(--safe-top, 0px))" }}
       >
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/matches')}
           className="p-2 -ml-2 rounded-full hover:bg-white/10 text-white transition-colors"
         >
           <ChevronLeft size={28} />

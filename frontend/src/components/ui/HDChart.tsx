@@ -118,58 +118,79 @@ export const HDChart: React.FC<HDChartProps> = ({ definedCenters }) => {
         })}
 
         {/* Centers */}
+        
+        {/* Helper function to draw a clean minimalist bubble for active centers */}
+        {Object.entries(centers).map(([key, p]) => {
+          if (!isDefined(key)) return null;
+          const label = CENTER_DESCRIPTIONS[key]?.title || key;
+          
+          // Determine offset based on side
+          const isLeft = p.x < 150;
+          const isRight = p.x > 150;
+          const textX = isLeft ? p.x - 30 : isRight ? p.x + 30 : p.x + 35;
+          const textAnchor = isLeft ? "end" : "start";
+          
+          return (
+            <g key={`label-${key}`} className="pointer-events-none fade-in">
+              {/* Soft pill background */}
+              <text 
+                x={textX} 
+                y={p.y + 3} 
+                fontSize="11" 
+                fontWeight="700" 
+                fill="#4A9E7F" 
+                textAnchor={textAnchor} 
+                style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }}
+              >
+                {label}
+              </text>
+            </g>
+          );
+        })}
+
         {/* Head: Triangle Up */}
         <g onClick={() => handleCenterClick("Head")}>
           <polygon className={centerClass("Head")} points="150,15 174,45 126,45" />
-          <text x="150" y="38" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Теменной</text>
         </g>
 
         {/* Ajna: Triangle Down */}
         <g onClick={() => handleCenterClick("Ajna")}>
           <polygon className={centerClass("Ajna")} points="126,85 174,85 150,115" />
-          <text x="150" y="95" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Аджна</text>
         </g>
 
         {/* Throat: Square */}
         <g onClick={() => handleCenterClick("Throat")}>
           <rect className={centerClass("Throat")} x="135" y="140" width="30" height="30" rx="6" />
-          <text x="150" y="157" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Горловой</text>
         </g>
 
         {/* G-Center: Diamond */}
         <g onClick={() => handleCenterClick("G")}>
           <polygon className={centerClass("G")} points="150,195 175,220 150,245 125,220" />
-          <text x="150" y="222" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Джи</text>
         </g>
 
         {/* Heart: Triangle Down */}
         <g onClick={() => handleCenterClick("Heart")}>
           <polygon className={centerClass("Heart")} points="190,165 230,165 210,195" />
-          <text x="210" y="180" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Эго</text>
         </g>
 
         {/* Sacral: Square */}
         <g onClick={() => handleCenterClick("Sacral")}>
           <rect className={centerClass("Sacral")} x="135" y="275" width="30" height="30" rx="6" />
-          <text x="150" y="292" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Сакрал</text>
-        </g>
-
-        {/* Solar Plexus: Triangle Left */}
-        <g onClick={() => handleCenterClick("SolarPlexus")}>
-          <polygon className={centerClass("SolarPlexus")} points="235,265 235,315 190,290" />
-          <text x="215" y="292" fontSize="6.5" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Эмоции</text>
         </g>
 
         {/* Spleen: Triangle Right */}
         <g onClick={() => handleCenterClick("Spleen")}>
           <polygon className={centerClass("Spleen")} points="65,265 65,315 110,290" />
-          <text x="85" y="292" fontSize="7" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Селезенка</text>
+        </g>
+
+        {/* Solar Plexus: Triangle Left */}
+        <g onClick={() => handleCenterClick("SolarPlexus")}>
+          <polygon className={centerClass("SolarPlexus")} points="235,265 235,315 190,290" />
         </g>
 
         {/* Root: Square */}
         <g onClick={() => handleCenterClick("Root")}>
           <rect className={centerClass("Root")} x="135" y="345" width="30" height="30" rx="6" />
-          <text x="150" y="362" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Корень</text>
         </g>
       </svg>
       

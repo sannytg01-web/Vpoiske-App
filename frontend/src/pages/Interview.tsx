@@ -221,6 +221,7 @@ export const Interview: React.FC = () => {
                   key={idx}
                   initial={{ opacity: 0, scale: 0.5, filter: "blur(20px)" }}
                   animate={{ 
+                    x: "-50%", y: "-50%",
                     opacity: isActive ? 0.6 : 0.05, 
                     scale: isActive ? 1.5 : 0.8,
                     filter: isActive ? "blur(30px)" : "blur(10px)"
@@ -230,7 +231,6 @@ export const Interview: React.FC = () => {
                   style={{
                     top: center.top,
                     left: center.left,
-                    transform: "translate(-50%, -50%)",
                     width: "80px",
                     height: "80px",
                     background: `radial-gradient(circle, ${center.color} 0%, transparent 70%)`

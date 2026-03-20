@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Zap, Heart } from 'lucide-react';
+import { Lock, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cardVariants } from '../../utils/animations';
 import type { MatchProfile } from '../../store/matchStore';
@@ -77,36 +77,34 @@ export const MatchCard: React.FC<MatchCardProps> = ({
       ) : (
         <div className="flex flex-col space-y-4">
             
-            {/* Short Match Reason AI resume */}
+            {/* Detailed AI Match Reason */}
             {match.match_reason && (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-3">
-                 <p className="text-sm leading-relaxed text-white/90 italic m-0">
-                   «{match.match_reason}»
+              <div className="bg-white/5 border border-[#4A9E7F]/30 rounded-xl p-4 shadow-inner">
+                 <div className="flex items-center gap-2 mb-2">
+                    <Sparkles size={14} className="text-[#00FF88]" />
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-[#00FF88]">Зоны пересечения (AI-анализ)</span>
+                 </div>
+                 <p className="text-[13px] leading-relaxed text-white/90">
+                   {match.match_reason}
                  </p>
               </div>
             )}
 
             {/* Matrix details */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-black/20 rounded-lg p-3 flex flex-col">
-                 <div className="flex items-center text-[#4A9E7F] mb-1">
-                   <Heart size={14} className="mr-1.5" />
-                   <span className="text-[10px] font-bold uppercase tracking-wider">Ценности</span>
-                 </div>
-                 <p className="text-[12px] text-white/80 font-medium leading-tight">
-                   {sharedValues.length > 0 ? sharedValues.slice(0,3).join(", ") : "Общие интересы"}
-                 </p>
-              </div>
-
-              <div className="bg-black/20 rounded-lg p-3 flex flex-col">
-                 <div className="flex items-center text-[#D4AF37] mb-1">
-                   <Zap size={14} className="mr-1.5" />
-                   <span className="text-[10px] font-bold uppercase tracking-wider">Синергия</span>
-                 </div>
-                 <p className="text-[12px] text-white/80 font-medium leading-tight line-clamp-2">
-                   Взаимное усиление энергии
-                 </p>
-              </div>
+            <div className="bg-black/20 rounded-xl p-3 flex flex-col border border-white/5">
+                <div className="flex items-center text-[#4A9E7F] mb-1.5">
+                  <Heart size={14} className="mr-1.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">Общие ценности</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {sharedValues.length > 0 ? sharedValues.slice(0,4).map((v: string) => (
+                    <span key={v} className="bg-[#4A9E7F]/10 text-white/80 px-2 py-1 rounded text-[11px] font-medium border border-[#4A9E7F]/20">
+                      {v}
+                    </span>
+                  )) : (
+                    <span className="text-[12px] text-white/50 font-medium">Общие интересы не найдены</span>
+                  )}
+                </div>
             </div>
 
             <button 

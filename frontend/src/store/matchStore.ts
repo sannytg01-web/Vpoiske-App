@@ -67,7 +67,7 @@ export const useMatchStore = create<MatchState>((set, get) => ({
             hd_type: 'Манифестирующий Генератор',
             photo: null,
             locked: false,
-            match_reason: 'Вас объединяет фокус на развитие и свободу. В HD он дополняет вашу энергию.',
+            match_reason: 'У вас глубокая совместимость на уровне ценностей: оба цените развитие и свободу. Психологически вы отлично дополняете друг друга — его стабильность уравновешивает вашу эмоциональность. В Human Design он помогает вам структурировать вашу бурлящую энергию Манифестирующего Генератора.',
             hd_profile: { definedCenters: ['Sacral', 'Throat', 'Root'], activeChannels: [[34, 20]] },
             details: {
               hd_score: 95,
@@ -87,7 +87,7 @@ export const useMatchStore = create<MatchState>((set, get) => ({
             hd_type: 'Проектор',
             photo: null,
             locked: false,
-            match_reason: 'Одинаковый взгляд на честность и покой. Глубокое понимание друг друга.',
+            match_reason: 'Одинаковый взгляд на честность и покой создаёт мощный фундамент для доверия. Его тип Проектора идеально подходит для того, чтобы направлять ваши идеи, не нарушая ваших личных границ. Вы сможете обсуждать самые глубокие темы, не боясь быть непонятыми.',
             hd_profile: { definedCenters: ['Head', 'Ajna', 'Throat'], activeChannels: [[43, 23], [17, 62]] },
             details: {
               hd_score: 80,

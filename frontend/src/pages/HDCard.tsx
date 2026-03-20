@@ -392,46 +392,43 @@ export const HDCard: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <GlassCard className="p-5 mb-4 border border-accent-warning/30 bg-[#1D1B1B]/80 backdrop-blur-xl relative overflow-hidden">
-                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent-warning/20 blur-[60px] rounded-full pointer-events-none" />
+                <GlassCard className="p-5 mb-4 border border-white/10 relative overflow-hidden">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#4A9E7F]/10 blur-[60px] rounded-full pointer-events-none" />
                   
                   <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/5 relative z-10">
-                    <AlertTriangle size={18} className="text-accent-warning drop-shadow-[0_0_8px_rgba(229,115,115,0.6)]" />
-                    <h3 className="text-body font-bold text-white m-0 tracking-wider uppercase drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
-                      Теневая Карта
+                    <Sparkles size={18} className="text-[#00FF88]" />
+                    <h3 className="text-body font-bold text-white m-0 tracking-wider uppercase">
+                      Внутренняя Тень
                     </h3>
                   </div>
                   
-                  <p className="text-[13px] text-white/70 mb-5 leading-relaxed relative z-10 italic">
-                    Твои теневые паттерны — это скрытая сила. Как только ты их осознаёшь, они перестают управлять тобой в отношениях.
+                  <p className="text-[13px] text-white/60 mb-5 leading-relaxed relative z-10">
+                    Твои теневые паттерны — это скрытая сила. Как только ты их осознаёшь, они становятся твоим ресурсом.
                   </p>
                   
                   <div className="flex flex-col gap-3 mb-6 relative z-10">
                     {psychProfile.shadow_patterns.map((s) => (
                       <div
                         key={s}
-                        className="bg-black/50 text-accent-warning px-4 py-3 rounded-xl text-sm font-semibold border-l-2 border-accent-warning/60 shadow-lg flex items-center justify-between"
+                        className="bg-black/30 text-white/90 px-4 py-3 rounded-xl text-sm font-medium border-l-2 border-[#4A9E7F]/60 shadow-inner flex items-center justify-between"
                       >
                         <span>{shadowLabels[s.toLowerCase()] || s}</span>
-                        <Sparkles size={14} className="opacity-40" />
                       </div>
                     ))}
                   </div>
 
                   <Button
-                    variant="primary"
-                    className="w-full relative z-10 font-bold tracking-wider uppercase text-xs overflow-hidden group"
-                    style={{ background: 'linear-gradient(135deg, rgba(229,115,115,0.8) 0%, rgba(183,28,28,0.8) 100%)', border: '1px solid rgba(229,115,115,0.3)' }}
-                    onClick={() => {
+                     className="w-full font-bold flex items-center justify-center py-3 rounded-xl transition-opacity hover:opacity-90 active:scale-[0.98]"
+                     style={{ background: 'var(--gradient-accent)', color: 'var(--text-on-accent)', boxShadow: '0 4px 15px rgba(74, 158, 127, 0.4)' }}
+                     onClick={() => {
                         const shadowsText = psychProfile.shadow_patterns.map((s: string) => shadowLabels[s.toLowerCase()] || s).join(" и ");
                         const text = `Моя скрытая сторона в отношениях — ${shadowsText}. Узнай свою теневую карту и найди совместимого партнёра во ВПоиске!`;
                         const url = `https://t.me/share/url?url=https://t.me/VlubviBot/app&text=${encodeURIComponent(text)}`;
                         window.open(url, '_blank');
                     }}
                   >
-                    <div className="absolute inset-0 bg-white/10 w-full h-full translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
                     <Share2 size={16} className="absolute left-6 text-white/90 drop-shadow-md" />
-                    <span className="drop-shadow-md">Поделиться в Telegram</span>
+                    <span className="drop-shadow-sm uppercase text-xs tracking-wider">Поделиться в Telegram</span>
                   </Button>
                 </GlassCard>
               </motion.div>

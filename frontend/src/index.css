@@ -54,6 +54,22 @@
   }
 }
 
+/* Global scrollbar styling for the whole app */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15); 
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 158, 127, 0.5); 
+}
+
 /* Story progress bar animation */
 @keyframes story-fill {
   from { width: 0%; }

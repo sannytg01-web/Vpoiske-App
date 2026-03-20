@@ -244,7 +244,7 @@ export const Onboarding: React.FC = () => {
         {/* FOOTER */}
         <p className="text-caption text-muted text-center mt-auto px-4 pb-4">
           Нажимая кнопку, вы соглашаетесь с <br/>
-          <span className="underline underline-offset-4 decoration-[rgba(74,158,127,0.5)] text-accent-secondary" onClick={() => navigate('/consent')}>Правилами и Политикой</span>
+          <a href="#" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 decoration-[rgba(74,158,127,0.5)] text-accent-secondary">Правилами и Политикой</a>
         </p>
       </div>
 
