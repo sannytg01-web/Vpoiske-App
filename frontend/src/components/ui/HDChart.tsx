@@ -1,18 +1,36 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface HDChartProps {
   definedCenters: string[];
   activeChannels: [number, number][]; // Not strictly used for exact drawing in this simplified aesthetic version
 }
 
+const CENTER_DESCRIPTIONS: Record<string, { title: string, defined: string, undefined: string }> = {
+  Head: { title: "Вдохновение (Теменной)", defined: "У вас свой постоянный источник вопросов и вдохновения.", undefined: "Вы открыты к идеям извне и впитываете вдохновение мира." },
+  Ajna: { title: "Мышление (Аджна)", defined: "У вас фиксированный способ обработки информации и убеждения.", undefined: "Вы гибко мыслите и легко воспринимаете разные точки зрения." },
+  Throat: { title: "Выражение (Горловой)", defined: "Ваш голос уверенный, вы способны стабильно выражать свои мысли.", undefined: "Ваш голос подстраивается под среду, вы отлично озвучиваете чужие идеи." },
+  G: { title: "Идентичность (Джи)", defined: "Вы чётко чувствуете свой путь, вектор движения и любовь к себе.", undefined: "Ваш компас гибок, вы познаёте себя и свое направление через мир." },
+  Heart: { title: "Сила воли (Эго)", defined: "У вас мощная воля. Сказано — сделано. Важно сдерживать обещания.", undefined: "Вам совершенно не нужно никому (включая себя) ничего доказывать." },
+  Sacral: { title: "Энергия (Сакральный)", defined: "У вас встроен неиссякаемый генератор жизненной и рабочей энергии.", undefined: "Ваша энергия работает циклами, вам критически важно вовремя отдыхать." },
+  SolarPlexus: { title: "Эмоции (Сплетение)", defined: "Вы излучаете эмоции, переживая их глубокими внутренними волнами.", undefined: "Вы очень эмпатичны и сильно считываете/усиливаете чувства других людей." },
+  Spleen: { title: "Интуиция (Селезенка)", defined: "У вас острая интуиция в моменте 'здесь и сейчас' и сильный инстинкт.", undefined: "Вы чувствительны к здоровью, пропускаете через себя страхи окружения." },
+  Root: { title: "Драйв (Корневой)", defined: "Вы справляетесь со стрессом, преобразуя давление в мощный драйв к действию.", undefined: "Давление извне может заставлять вас спешить. Важно заземляться." }
+};
+
 export const HDChart: React.FC<HDChartProps> = ({ definedCenters }) => {
+  const [activeCenter, setActiveCenter] = useState<string | null>(null);
+
   const isDefined = (key: string) => definedCenters.includes(key);
 
   const centerClass = (key: string) =>
     isDefined(key)
-      ? "fill-[#4A9E7F] opacity-90 transition-all duration-500 stroke-[#7bc4a0] stroke-[2px]"
-      : "fill-[#142920] stroke-white/20 stroke-[1.5px] transition-all duration-500";
+      ? "fill-[#4A9E7F] opacity-90 transition-all duration-300 stroke-[#7bc4a0] stroke-[2px] cursor-pointer hover:opacity-100 drop-shadow-md"
+      : "fill-[#142920] stroke-white/20 stroke-[1.5px] transition-all duration-300 cursor-pointer hover:stroke-white/50";
+
+  const handleCenterClick = (key: string) => {
+    setActiveCenter(activeCenter === key ? null : key);
+  };
 
   // True logical centers for perfectly straight beautiful lines
   const centers = {
@@ -101,41 +119,84 @@ export const HDChart: React.FC<HDChartProps> = ({ definedCenters }) => {
 
         {/* Centers */}
         {/* Head: Triangle Up */}
-        <polygon className={centerClass("Head")} points="150,15 174,45 126,45" />
-        <text x="150" y="55" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Вдохновение</text>
+        <g onClick={() => handleCenterClick("Head")}>
+          <polygon className={centerClass("Head")} points="150,15 174,45 126,45" />
+          <text x="150" y="38" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Теменной</text>
+        </g>
 
         {/* Ajna: Triangle Down */}
-        <polygon className={centerClass("Ajna")} points="126,85 174,85 150,115" />
-        <text x="150" y="125" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Мышление</text>
+        <g onClick={() => handleCenterClick("Ajna")}>
+          <polygon className={centerClass("Ajna")} points="126,85 174,85 150,115" />
+          <text x="150" y="95" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Аджна</text>
+        </g>
 
         {/* Throat: Square */}
-        <rect className={centerClass("Throat")} x="135" y="140" width="30" height="30" rx="6" />
-        <text x="150" y="180" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Выражение</text>
+        <g onClick={() => handleCenterClick("Throat")}>
+          <rect className={centerClass("Throat")} x="135" y="140" width="30" height="30" rx="6" />
+          <text x="150" y="157" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Горловой</text>
+        </g>
 
         {/* G-Center: Diamond */}
-        <polygon className={centerClass("G")} points="150,195 175,220 150,245 125,220" />
-        <text x="150" y="255" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Идентичность</text>
+        <g onClick={() => handleCenterClick("G")}>
+          <polygon className={centerClass("G")} points="150,195 175,220 150,245 125,220" />
+          <text x="150" y="222" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Джи</text>
+        </g>
 
         {/* Heart: Triangle Down */}
-        <polygon className={centerClass("Heart")} points="190,165 230,165 210,195" />
-        <text x="210" y="205" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Сила воли</text>
+        <g onClick={() => handleCenterClick("Heart")}>
+          <polygon className={centerClass("Heart")} points="190,165 230,165 210,195" />
+          <text x="210" y="180" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Эго</text>
+        </g>
 
         {/* Sacral: Square */}
-        <rect className={centerClass("Sacral")} x="135" y="275" width="30" height="30" rx="6" />
-        <text x="150" y="315" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Энергия</text>
+        <g onClick={() => handleCenterClick("Sacral")}>
+          <rect className={centerClass("Sacral")} x="135" y="275" width="30" height="30" rx="6" />
+          <text x="150" y="292" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Сакрал</text>
+        </g>
 
         {/* Solar Plexus: Triangle Left */}
-        <polygon className={centerClass("SolarPlexus")} points="235,265 235,315 190,290" />
-        <text x="212" y="325" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Эмоции</text>
+        <g onClick={() => handleCenterClick("SolarPlexus")}>
+          <polygon className={centerClass("SolarPlexus")} points="235,265 235,315 190,290" />
+          <text x="215" y="292" fontSize="6.5" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Эмоции</text>
+        </g>
 
         {/* Spleen: Triangle Right */}
-        <polygon className={centerClass("Spleen")} points="65,265 65,315 110,290" />
-        <text x="87" y="325" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Интуиция</text>
+        <g onClick={() => handleCenterClick("Spleen")}>
+          <polygon className={centerClass("Spleen")} points="65,265 65,315 110,290" />
+          <text x="85" y="292" fontSize="7" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Селезенка</text>
+        </g>
 
         {/* Root: Square */}
-        <rect className={centerClass("Root")} x="135" y="345" width="30" height="30" rx="6" />
-        <text x="150" y="385" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.7)" textAnchor="middle">Драйв</text>
+        <g onClick={() => handleCenterClick("Root")}>
+          <rect className={centerClass("Root")} x="135" y="345" width="30" height="30" rx="6" />
+          <text x="150" y="362" fontSize="8" fontWeight="600" fill="rgba(255,255,255,0.8)" textAnchor="middle" className="pointer-events-none">Корень</text>
+        </g>
       </svg>
+      
+      {/* Popover Description */}
+      <AnimatePresence>
+        {activeCenter && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            className="absolute bottom-4 left-4 right-4 bg-[#0d1f1a]/90 backdrop-blur-xl border border-[#4A9E7F]/30 p-4 rounded-2xl z-20 shadow-[0_10px_40px_rgba(0,0,0,0.5)] cursor-pointer"
+            onClick={() => setActiveCenter(null)}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-[13px] font-bold text-white m-0 uppercase tracking-widest">
+                {CENTER_DESCRIPTIONS[activeCenter].title}
+              </h4>
+              <span className={`text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase ${isDefined(activeCenter) ? "bg-[#4A9E7F]/20 text-[#7bc4a0] border border-[#4A9E7F]/30" : "bg-white/5 text-white/50 border border-white/10"}`}>
+                 {isDefined(activeCenter) ? "Определён" : "Открыт"}
+              </span>
+            </div>
+            <p className="text-sm text-white/80 leading-snug m-0">
+               {isDefined(activeCenter) ? CENTER_DESCRIPTIONS[activeCenter].defined : CENTER_DESCRIPTIONS[activeCenter].undefined}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

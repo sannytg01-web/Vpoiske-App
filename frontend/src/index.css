@@ -25,6 +25,15 @@
   #root {
     @apply max-w-md mx-auto relative min-h-screen shadow-2xl bg-transparent;
   }
+
+  /* Globally hide scrollbars for all scrollable elements in the app */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }
 
 @layer utilities {

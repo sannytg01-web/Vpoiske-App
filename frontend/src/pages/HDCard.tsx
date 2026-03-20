@@ -11,6 +11,7 @@ import {
   Zap,
   Shield,
   Sparkles,
+  Share2,
 } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
@@ -92,15 +93,15 @@ export const HDCard: React.FC = () => {
   // Type descriptions mapping
   const typeDescriptions: Record<string, string> = {
     Генератор:
-      "Ты — источник жизненной силы и энергии. Твоя стратегия — ждать отклика Сакрального центра, чтобы вкладывать энергию только в то, что по-настоящему зажигает.",
+      "Вы — источник неиссякаемой энергии. Главное для вас — заниматься только тем, что зажигает искру внутри, и не тратить силы на то, что вам не откликается.",
     "Манифестирующий Генератор":
-      "Ты обладаешь мощной энергией, способной не только инициировать процессы, но и доводить их до конца. Важно следовать отклику, прежде чем действовать.",
+      "У вас мощная батарейка: вы можете быстро запускать проекты и легко доводить их до конца. Главное — прислушиваться к внутреннему 'да', прежде чем бросаться в новое дело.",
     Манифестор:
-      "Ты рождён(а), чтобы влиять на мир и свободен(на) инициировать процессы. Главное — информировать других о своих решениях до того, как начнёшь действовать.",
+      "Вы созданы влиять на других и прокладывать новые пути. Ваша суперсила — запускать процессы и объединять людей, просто не забывайте предупреждать близких о своих планах.",
     Проектор:
-      "Твой дар — видеть глубокую суть других людей и процессов. Твоя стратегия — ждать приглашения, чтобы твоя мудрость и направление были услышаны и приняты.",
+      "Ваш уникальный дар — видеть глубину в других людях и направлять их энергию. Вы раскрываете свой максимум, когда вас искренне ценят и приглашают.",
     Отражатель:
-      "Твоя аура как зеркало: ты отражаешь состояние среды и коллектива. Тебе нужно 28 дней лунного цикла для принятия действительно важных решений.",
+      "Вы уникальны: как чистое зеркало отражаете атмосферу и людей вокруг. Вам нужно больше времени на принятие важных решений, чтобы 'прожить' ситуацию со всех сторон.",
   };
 
   const centerRussianMap: Record<string, string> = {
@@ -384,28 +385,56 @@ export const HDCard: React.FC = () => {
               </div>
             </GlassCard>
 
-            {/* Shadow Patterns (delicate) */}
+            {/* Shadow Patterns Shareable Card */}
             {psychProfile.shadow_patterns.length > 0 && (
-              <Accordion
-                title="Зоны роста"
-                isOpen={openAccordion === "shadows"}
-                onToggle={() => toggleAccordion("shadows")}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <p className="text-caption text-secondary mb-3">
-                  Это не недостатки, а зоны, где ты можешь расти и углублять
-                  осознанность.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {psychProfile.shadow_patterns.map((s) => (
-                    <span
-                      key={s}
-                      className="bg-accent-warning/10 text-accent-warning px-3 py-1 rounded-full text-xs font-medium border border-accent-warning/20"
-                    >
-                      {shadowLabels[s.toLowerCase()] || s}
-                    </span>
-                  ))}
-                </div>
-              </Accordion>
+                <GlassCard className="p-5 mb-4 border border-accent-warning/30 bg-[#1D1B1B]/80 backdrop-blur-xl relative overflow-hidden">
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent-warning/20 blur-[60px] rounded-full pointer-events-none" />
+                  
+                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-white/5 relative z-10">
+                    <AlertTriangle size={18} className="text-accent-warning drop-shadow-[0_0_8px_rgba(229,115,115,0.6)]" />
+                    <h3 className="text-body font-bold text-white m-0 tracking-wider uppercase drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+                      Теневая Карта
+                    </h3>
+                  </div>
+                  
+                  <p className="text-[13px] text-white/70 mb-5 leading-relaxed relative z-10 italic">
+                    Твои теневые паттерны — это скрытая сила. Как только ты их осознаёшь, они перестают управлять тобой в отношениях.
+                  </p>
+                  
+                  <div className="flex flex-col gap-3 mb-6 relative z-10">
+                    {psychProfile.shadow_patterns.map((s) => (
+                      <div
+                        key={s}
+                        className="bg-black/50 text-accent-warning px-4 py-3 rounded-xl text-sm font-semibold border-l-2 border-accent-warning/60 shadow-lg flex items-center justify-between"
+                      >
+                        <span>{shadowLabels[s.toLowerCase()] || s}</span>
+                        <Sparkles size={14} className="opacity-40" />
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    className="w-full relative z-10 font-bold tracking-wider uppercase text-xs overflow-hidden group"
+                    style={{ background: 'linear-gradient(135deg, rgba(229,115,115,0.8) 0%, rgba(183,28,28,0.8) 100%)', border: '1px solid rgba(229,115,115,0.3)' }}
+                    onClick={() => {
+                        const shadowsText = psychProfile.shadow_patterns.map((s: string) => shadowLabels[s.toLowerCase()] || s).join(" и ");
+                        const text = `Моя скрытая сторона в отношениях — ${shadowsText}. Узнай свою теневую карту и найди совместимого партнёра во ВПоиске!`;
+                        const url = `https://t.me/share/url?url=https://t.me/VlubviBot/app&text=${encodeURIComponent(text)}`;
+                        window.open(url, '_blank');
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-white/10 w-full h-full translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+                    <Share2 size={16} className="absolute left-6 text-white/90 drop-shadow-md" />
+                    <span className="drop-shadow-md">Поделиться в Telegram</span>
+                  </Button>
+                </GlassCard>
+              </motion.div>
             )}
 
             {/* Profile Notes from AI */}

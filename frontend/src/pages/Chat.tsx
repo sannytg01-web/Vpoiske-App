@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Send, Mic, MicOff, Sparkles } from "lucide-react";
+import { ChevronLeft, Send, Mic, MicOff, Sparkles, Lock, Image as ImageIcon } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
 import { useChatStore } from "../store/chatStore";
@@ -26,6 +26,34 @@ export const Chat: React.FC = () => {
 
   const [inputText, setInputText] = useState("");
   const [showAiHints, setShowAiHints] = useState(false);
+  const approach = localStorage.getItem('vpoiske_approach') || 'scientific';
+
+  // Photo Anonymity State
+  const [photoUnlocked, setPhotoUnlocked] = useState(false);
+  const [photoRequestSent, setPhotoRequestSent] = useState(false);
+  const [showPhotoRequest, setShowPhotoRequest] = useState(false);
+
+  useEffect(() => {
+    if (messages.length >= 3 && !photoUnlocked && !photoRequestSent) {
+      setShowPhotoRequest(true);
+    }
+  }, [messages.length, photoUnlocked, photoRequestSent]);
+
+  const handleRequestPhoto = () => {
+    setPhotoRequestSent(true);
+    setShowPhotoRequest(false);
+    // Simulate other person accepting after 2 seconds
+    setTimeout(() => {
+      setPhotoUnlocked(true);
+      addMessage({
+        id: Date.now().toString() + "_sys_photo",
+        sender_id: m.id as any,
+        content: "✨ Фотографии открыты! Теперь вы видите друг друга.",
+        created_at: new Date().toISOString(),
+        read_at: null,
+      });
+    }, 2500);
+  };
 
   const wsRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -252,9 +280,16 @@ export const Chat: React.FC = () => {
             className="relative cursor-pointer"
             onClick={() => navigate(`/matches/${m.id}`)}
           >
-            <div className="w-[40px] h-[40px] rounded-full border border-white/20 bg-gradient-to-br from-[#4A9E7F] to-[#142920] flex items-center justify-center overflow-hidden">
-              {m.photo ? (
+            <div className="w-[40px] h-[40px] rounded-full border border-white/20 bg-gradient-to-br from-[#4A9E7F] to-[#142920] flex items-center justify-center overflow-hidden relative">
+              {m.photo && photoUnlocked ? (
                 <img src={m.photo} className="w-full h-full object-cover" />
+              ) : m.photo && !photoUnlocked ? (
+                <>
+                  <img src={m.photo} className="w-full h-full object-cover blur-md scale-125 opacity-60" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#0d1f1a]/40">
+                    <Lock size={14} className="text-white/90 drop-shadow-md" />
+                  </div>
+                </>
               ) : (
                 <span className="text-xl text-white font-serif">
                   {m.name.charAt(0)}
@@ -290,6 +325,36 @@ export const Chat: React.FC = () => {
           <Sparkles size={20} />
         </button>
       </div>
+
+      {/* PHOTO EXCHANGE BANNER */}
+      {showPhotoRequest && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          className="px-4 py-3 bg-gradient-to-r from-[#4A9E7F]/20 to-[#4A9E7F]/5 border-b border-[#4A9E7F]/30 flex items-center justify-between z-10"
+        >
+          <div className="flex items-center gap-2">
+            <ImageIcon size={16} className="text-[#7bc4a0]" />
+            <span className="text-[12px] text-white/90 font-medium">Обменяться фото?</span>
+          </div>
+          <button 
+            onClick={handleRequestPhoto} 
+            className="px-3 py-1.5 bg-[#4A9E7F] text-white text-[11px] font-bold rounded-lg shadow-lg uppercase tracking-wide hover:bg-[#5bb896] transition-colors"
+          >
+            Предложить
+          </button>
+        </motion.div>
+      )}
+      
+      {photoRequestSent && !photoUnlocked && (
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="px-4 py-2 bg-white/5 border-b border-white/10 flex items-center justify-center z-10"
+        >
+          <span className="text-[11px] text-white/50 text-center uppercase tracking-widest animate-pulse">
+            Ожидаем согласия {m.name}...
+          </span>
+        </motion.div>
+      )}
 
       {/* MESSAGES AREA */}
       <div
@@ -349,13 +414,15 @@ export const Chat: React.FC = () => {
             </div>
             <div className="space-y-2">
               {[
+                approach === 'esoteric' 
+                  ? `Твоя энергия по дизайну — ${m.hd_type}. Как ты ощущаешь этот поток в жизни?`
+                  : `Твой профиль — ${m.hd_type}. Как это описание резонирует с твоим характером?`,
                 m.details?.values?.shared_values?.[0]
-                  ? `Мы оба ценим \xab${m.details.values.shared_values[0]}\xbb \u2014 расскажи, как это проявляется в твоей жизни?`
-                  : `Если бы ты мог(ла) телепортироваться куда угодно прямо сейчас, куда бы?`,
-                `Что для тебя значит \xabнайти своего человека\xbb?`,
-                m.hd_type
-                  ? `Ты ${m.hd_type} по Human Design \u2014 чувствуешь ли это в повседневной жизни?`
-                  : `Какой фильм или книга изменили твой взгляд на отношения?`,
+                  ? `Мы оба ценим «${m.details.values.shared_values[0].toLowerCase()}» — как это качество проявляется в твоей жизни?`
+                  : (approach === 'esoteric' ? `Что наполняет твою душу ресурсом в трудные моменты?` : `Какие принципы в отношениях для тебя не подлежат компромиссу?`),
+                approach === 'esoteric'
+                   ? `С какой своей «теневой» стороной тебе сложнее всего договориться?`
+                   : `Как ты обычно реагируешь на острые или конфликтные стрессовые ситуации?`,
               ].map((hint, i) => (
                 <button
                   key={i}

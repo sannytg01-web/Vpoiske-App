@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, User } from "lucide-react";
+import { Heart, User, ChevronLeft } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
 import { SectionTag } from "../components/ui/SectionTag";
@@ -64,8 +64,16 @@ export const Matches: React.FC = () => {
       <div className="flex-1 overflow-y-auto px-4 py-8 pb-24">
         {/* HEADER */}
         <div className="flex justify-between items-start mb-6 pt-2">
-          <div>
-            <SectionTag className="mb-2">ДЛЯ ТЕБЯ</SectionTag>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3 mb-2">
+              <button
+                onClick={() => navigate(-1)}
+                className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-white/10 text-white transition-colors"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <SectionTag className="m-0">ДЛЯ ТЕБЯ</SectionTag>
+            </div>
             <h2 className="text-h2 text-white m-0 tracking-tight flex items-center">
               Совпадения
               <span className="ml-3 bg-accent-warm text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-[0_0_15px_rgba(229,176,121,0.5)]">
@@ -149,6 +157,7 @@ export const Matches: React.FC = () => {
                   age={m.age}
                   photoUrl={m.photo || ""}
                   compatibilityScore={m.score}
+                  matchReason={m.match_reason}
                   isLocked={m.locked}
                   delayIndex={idx}
                   onClick={() => navigate(`/matches/${m.id}`)}

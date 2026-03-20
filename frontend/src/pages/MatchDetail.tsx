@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   MessageCircle,
   Zap,
+  EyeOff,
 } from "lucide-react";
 
 import { AppBackground } from "../components/ui/AppBackground";
@@ -20,6 +21,7 @@ import { Button } from "../components/ui/Button";
 import { pageTransition } from "../utils/animations";
 import { useMatchStore } from "../store/matchStore";
 import { useAuthStore } from "../store/authStore";
+import { HDChart } from "../components/ui/HDChart";
 
 // ──── Helper: generate match insights based on scores ────
 const generateWhyMatched = (d: any) => {
@@ -101,23 +103,36 @@ const generateGrowthAreas = (d: any) => {
   return areas;
 };
 
-// Ice-breaker questions
 const generateIcebreakers = (hdType: string, sharedValues: string[]) => {
-  const baseQuestions = [
-    `Если бы ты мог(ла) телепортироваться в любое место прямо сейчас — куда бы отправился(ась)?`,
-    `Что для тебя значит «найти своего человека»?`,
-    `Какой фильм или книга изменили твой взгляд на отношения?`,
-  ];
+  const approach = localStorage.getItem('vpoiske_approach') || 'scientific';
+  const icebreakers = [];
 
+  // 1. HD
+  if (approach === 'esoteric') {
+    icebreakers.push(`Твоя энергия по дизайну — ${hdType}. Как ты ощущаешь этот поток в теле и жизни?`);
+  } else {
+    icebreakers.push(`Твой профиль — ${hdType}. Как это описание резонирует с твоим характером?`);
+  }
+
+  // 2. Values
   if (sharedValues.length > 0) {
-    baseQuestions[0] = `Мы оба ценим «${sharedValues[0]}» — расскажи, как это проявляется в твоей жизни?`;
+     icebreakers.push(`Мы оба ценим «${sharedValues[0].toLowerCase()}» — как это ключевое качество проявляется в твоей жизни?`);
+  } else {
+     if (approach === 'esoteric') icebreakers.push(`Что наполняет твою душу ресурсом в трудные моменты?`);
+     else icebreakers.push(`Какие принципы в отношениях для тебя абсолютно не подлежат компромиссу?`);
   }
 
-  if (hdType) {
-    baseQuestions[2] = `Ты ${hdType} по Human Design — чувствуешь ли ты это в повседневной жизни?`;
+  // 3. Psychology
+  if (approach === 'esoteric') {
+    icebreakers.push(`С какой своей «теневой» стороной тебе сложнее всего договориться?`);
+  } else {
+    icebreakers.push(`Как ты обычно реагируешь на острые или конфликтные стрессовые ситуации?`);
   }
 
-  return baseQuestions;
+  // 4. Interests
+  icebreakers.push(`Расскажи о хобби или увлечении, за которым ты можешь потерять счёт времени?`);
+
+  return icebreakers;
 };
 
 export const MatchDetail: React.FC = () => {
@@ -127,6 +142,7 @@ export const MatchDetail: React.FC = () => {
   const isPremium = useAuthStore((s) => s.isPremium);
 
   const [processing, setProcessing] = useState(false);
+  const [signSent, setSignSent] = useState(false);
   const [authError, setAuthError] = useState(false);
   const [showIcebreakers, setShowIcebreakers] = useState(false);
 
@@ -167,6 +183,12 @@ export const MatchDetail: React.FC = () => {
     setProcessing(true);
     await skipMatch(selectedMatch.id);
     navigate(-1);
+  };
+
+  const handleSendAnonymousSign = () => {
+    setSignSent(true);
+    // In actual implementation, an API call would queue a generic push notification to user_b.
+    // e.g. apiClient.post(`/matches/${id}/anonymous-ping`)
   };
 
   if (authError || (selectedMatch && selectedMatch.locked && !isPremium)) {
@@ -378,6 +400,16 @@ export const MatchDetail: React.FC = () => {
                 HUMAN DESIGN
               </h3>
             </div>
+            
+            <div className="w-full flex justify-center mb-6">
+               <div className="w-4/5 max-w-[280px]">
+                  <HDChart 
+                    definedCenters={m.hd_profile?.definedCenters || ["Sacral", "Ajna"]} 
+                    activeChannels={m.hd_profile?.activeChannels || []} 
+                  />
+               </div>
+            </div>
+
             <p className="text-body text-secondary leading-relaxed mb-2">
               {m.name} — {m.hd_type}.{" "}
               {d?.hd_score >= 85
@@ -535,28 +567,45 @@ export const MatchDetail: React.FC = () => {
 
       {/* FLOATING ACTION DOCK */}
       <div
-        className="fixed bottom-0 left-0 w-full p-4 px-6 z-10 flex space-x-3"
+        className="fixed bottom-0 left-0 w-full p-4 px-6 z-10 flex flex-col space-y-3"
         style={{
-          background: "linear-gradient(to top, #0d1f1a 80%, transparent)",
+          background: "linear-gradient(to top, #0d1f1a 80%, rgba(13,31,26,0.9) 20%, transparent)",
           paddingBottom: "calc(16px + var(--safe-bottom))",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)"
         }}
       >
-        <Button
-          variant="secondary"
-          className="flex-1 bg-white/5 border border-white/10 text-white hover:bg-white/10"
-          disabled={processing}
-          onClick={handleSkip}
+        <button
+          onClick={handleSendAnonymousSign}
+          disabled={signSent}
+          className={`w-full py-3.5 rounded-[18px] flex items-center justify-center space-x-2 text-[13px] font-bold tracking-wider uppercase border transition-all ${
+            signSent 
+              ? "bg-[#4A9E7F]/20 text-[#4A9E7F] border-[#4A9E7F]/30 shadow-[0_0_15px_rgba(74,158,127,0.2)]" 
+              : "bg-white/5 border-white/10 text-white/90 hover:bg-white/10 shadow-lg"
+          }`}
         >
-          Не мой человек
-        </Button>
-        <Button
-          variant="primary"
-          className="flex-[1.5]"
-          disabled={processing}
-          onClick={handleStartChat}
-        >
-          Начать общение →
-        </Button>
+          {signSent ? <Sparkles size={16} /> : <EyeOff size={16} />}
+          <span>{signSent ? "Вы дали анонимный знак!" : "Дать знак анонимно"}</span>
+        </button>
+
+        <div className="flex space-x-3 w-full">
+          <Button
+            variant="secondary"
+            className="flex-1 bg-white/5 border border-white/10 text-white hover:bg-white/10 text-[13px]"
+            disabled={processing}
+            onClick={handleSkip}
+          >
+            Скрыть
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-[1.5] text-[13px]"
+            disabled={processing}
+            onClick={handleStartChat}
+          >
+            Написать первым →
+          </Button>
+        </div>
       </div>
     </motion.div>
   );

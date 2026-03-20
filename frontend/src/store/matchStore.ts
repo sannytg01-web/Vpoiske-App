@@ -19,6 +19,8 @@ export interface MatchProfile {
   hd_type: string;
   photo: string | null;
   locked: boolean;
+  match_reason?: string;
+  hd_profile?: any;
   details: MatchDetails;
 }
 
@@ -65,6 +67,8 @@ export const useMatchStore = create<MatchState>((set, get) => ({
             hd_type: 'Манифестирующий Генератор',
             photo: null,
             locked: false,
+            match_reason: 'Вас объединяет фокус на развитие и свободу. В HD он дополняет вашу энергию.',
+            hd_profile: { definedCenters: ['Sacral', 'Throat', 'Root'], activeChannels: [[34, 20]] },
             details: {
               hd_score: 95,
               psychology_score: 90,
@@ -83,6 +87,8 @@ export const useMatchStore = create<MatchState>((set, get) => ({
             hd_type: 'Проектор',
             photo: null,
             locked: false,
+            match_reason: 'Одинаковый взгляд на честность и покой. Глубокое понимание друг друга.',
+            hd_profile: { definedCenters: ['Head', 'Ajna', 'Throat'], activeChannels: [[43, 23], [17, 62]] },
             details: {
               hd_score: 80,
               psychology_score: 88,

@@ -14,6 +14,7 @@ import { DataExport } from "./pages/DataExport";
 import { DeleteAccount } from "./pages/DeleteAccount";
 import { AdminPanel } from "./pages/AdminPanel";
 import { CreateProfile } from "./pages/CreateProfile";
+import { Home } from "./pages/Home";
 
 import { Interview } from "./pages/Interview";
 
@@ -27,7 +28,7 @@ export const AppRouter: React.FC = () => {
     if (!isAuth) return "/onboarding";
     if (!hasCompletedInterview) return "/consent";
     if (!hasCompletedBirthData) return "/birth-data";
-    return "/matches";
+    return "/home";
   };
 
   return (
@@ -41,6 +42,12 @@ export const AppRouter: React.FC = () => {
         />
 
         {/* Protected routes */}
+        <Route
+          path="/home"
+          element={
+            isAuth ? <Home /> : <Navigate to="/onboarding" replace />
+          }
+        />
         <Route
           path="/consent"
           element={

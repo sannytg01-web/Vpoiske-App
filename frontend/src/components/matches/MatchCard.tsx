@@ -8,6 +8,7 @@ export interface MatchCardProps {
   age: number;
   photoUrl: string;
   compatibilityScore: number;
+  matchReason?: string;
   isLocked?: boolean;
   onUnlockClick?: () => void;
   onClick?: () => void;
@@ -19,6 +20,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   age, 
   photoUrl, 
   compatibilityScore, 
+  matchReason,
   isLocked = false, 
   onUnlockClick,
   onClick,
@@ -53,8 +55,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           }}
         />
       ) : (
-        <div 
-          className="absolute inset-0 w-full h-full flex flex-col justify-center items-center pointer-events-none"
+          <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center pointer-events-none p-4"
           style={{
             background: 'linear-gradient(135deg, #1c3d33 0%, #0d1f1a 100%)',
           }}
@@ -62,6 +63,11 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           <span className="text-[72px] font-thin text-white/10 uppercase" style={{ fontFamily: "Inter", transform: "translateY(-10px)" }}>
             {name.charAt(0)}
           </span>
+          {matchReason && !hasPhoto && (
+            <p className="text-[11px] leading-tight text-white/70 text-center font-medium line-clamp-4 absolute bottom-[80px] px-4 opacity-90">
+              {matchReason}
+            </p>
+          )}
         </div>
       )}
 
@@ -110,7 +116,12 @@ export const MatchCard: React.FC<MatchCardProps> = ({
 
       {/* Content Bottom */}
       <div className="absolute bottom-0 left-0 right-0 p-4 pb-5 flex flex-col z-20">
-        <h2 className="text-[17px] font-semibold tracking-wide text-white m-0 drop-shadow-md">{name}, {age}</h2>
+        <h2 className="text-[17px] font-semibold tracking-wide text-white m-0 drop-shadow-md pb-1">{name}, {age}</h2>
+        {matchReason && hasPhoto && (
+           <p className="text-[11px] leading-tight text-white/80 m-0 line-clamp-2">
+             {matchReason}
+           </p>
+        )}
       </div>
     </motion.div>
   );

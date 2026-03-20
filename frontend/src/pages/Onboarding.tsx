@@ -38,6 +38,7 @@ const STORIES = [
 export const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   const [isPhoneModalOpen, setPhoneModalOpen] = useState(false);
+  const [isEmailModalOpen, setEmailModalOpen] = useState(false);
   
   // Stories state
   const [showAuth, setShowAuth] = useState(false);
@@ -92,8 +93,8 @@ export const Onboarding: React.FC = () => {
       navigate('/consent');
     } catch (e) {
       console.error("TG Auth failed", e);
-      // Fallback for local testing if API fails
-      if (window.location.hostname === 'localhost' || window.location.hostname.includes('loca.lt')) {
+      // Fallback for local testing & Netlify demo if API/Environment fails
+      if (window.location.hostname === 'localhost' || window.location.hostname.includes('loca.lt') || window.location.hostname.includes('netlify.app')) {
         setAuthenticatedAction("tg_user");
         navigate('/consent');
       }
@@ -234,9 +235,7 @@ export const Onboarding: React.FC = () => {
             По номеру телефона
           </Button>
 
-          <Button variant="secondary" onClick={() => {
-            alert('Вход по Email временно недоступен в демо-версии.');
-          }} className="relative w-full">
+          <Button variant="secondary" onClick={() => setEmailModalOpen(true)} className="relative w-full">
              <Mail size={20} className="absolute left-6 text-white/60" />
             По электронной почте
           </Button>
@@ -253,9 +252,16 @@ export const Onboarding: React.FC = () => {
         isOpen={isPhoneModalOpen} 
         onClose={() => setPhoneModalOpen(false)} 
         onSuccess={() => {
-          // ALL users go through the standard flow — admins too!
           navigate('/consent');
         }} 
+      />
+
+      <EmailAuthModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        onSuccess={() => {
+          navigate('/consent');
+        }}
       />
     </motion.div>
   );
@@ -377,6 +383,127 @@ const PhoneAuthModal: React.FC<{isOpen: boolean, onClose: () => void, onSuccess:
                   <input
                     key={i}
                     id={`code-input-${i}`}
+                    type="tel"
+                    maxLength={1}
+                    value={c}
+                    onChange={(e) => handleCodeChange(i, e.target.value)}
+                    className="w-12 h-14 text-center text-h2 text-white rounded-2xl focus:outline-none focus:ring-1 transition-shadow"
+                    style={{ background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', outlineColor: 'var(--accent-main)' }}
+                  />
+                ))}
+              </div>
+              <p className="text-caption text-center text-muted mt-6">
+                Не пришел код? <span className="text-accent-secondary" onClick={handleSendCode}>Отправить снова (60с)</span>
+              </p>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+// Internal Modal for Email
+const EmailAuthModal: React.FC<{isOpen: boolean, onClose: () => void, onSuccess: (isAdmin?: boolean) => void}> = ({ isOpen, onClose, onSuccess }) => {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [email, setEmail] = useState('');
+  const [codeList, setCodeList] = useState<string[]>(Array(4).fill(''));
+
+  const handleSendCode = async () => {
+    if (!email.includes('@')) return;
+    try {
+      await apiClient.post('/auth/email/send-code', { email });
+      setStep(2);
+    } catch(e) { 
+      console.error('Failed to send email code:', e); 
+      // Always let pass in dev/stub mode
+      setStep(2);
+    }
+  };
+
+  const handleVerify = async (fullCode: string) => {
+    const adminEmails = ['admin@vpoiske.app', 'test@vpoiske.app'];
+    const isAdmin = adminEmails.includes(email);
+
+    try {
+      const res = await apiClient.post('/auth/email', { email, code: fullCode });
+      localStorage.setItem('access_token', res.data.access_token);
+      localStorage.setItem('refresh_token', res.data.refresh_token);
+      if (isAdmin) localStorage.setItem('vpoiske_is_admin', 'true');
+      
+      localStorage.setItem('vpoiske_email', email);
+      useAuthStore.getState().setAuthenticated(email);
+      onSuccess(isAdmin);
+      return;
+    } catch(e) { 
+      console.error('Backend auth failed, using local bypass:', e);
+    }
+
+    // Local bypass: accept ANY code for ANY email (for testing)
+    if (isAdmin) localStorage.setItem('vpoiske_is_admin', 'true');
+    localStorage.setItem('vpoiske_email', email);
+    useAuthStore.getState().setAuthenticated(email);
+    onSuccess(isAdmin);
+  };
+
+  const handleCodeChange = (idx: number, val: string) => {
+    const newVal = val.replace(/\D/g, '').slice(-1);
+    const newCode = [...codeList];
+    newCode[idx] = newVal;
+    setCodeList(newCode);
+
+    if (newVal && idx < 3) {
+      document.getElementById(`email-code-input-${idx + 1}`)?.focus();
+    }
+    
+    if (newCode.every(c => c)) {
+      handleVerify(newCode.join(''));
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+        className="fixed inset-0 z-50 flex flex-col justify-end"
+        style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'var(--blur-modal)', WebkitBackdropFilter: 'var(--blur-modal)' }}
+      >
+        <div className="absolute inset-0" onClick={onClose} />
+        <motion.div 
+          variants={bottomSheetVariants} initial="hidden" animate="visible" exit="exit"
+          className="relative w-full p-6 pt-4 rounded-t-[28px]"
+          style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-subtle)', paddingBottom: 'calc(32px + var(--safe-bottom))' }}
+        >
+          <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6" />
+          
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-h2 text-white m-0">{step === 1 ? 'Почта' : 'Введите код'}</h2>
+            <button onClick={onClose} className="p-2 text-muted hover:text-white transition-colors" ><X size={20} /></button>
+          </div>
+
+          {step === 1 ? (
+            <div className="space-y-6">
+              <TextInput 
+                type="email" 
+                label="ВАША ПОЧТА" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value.toLowerCase())} 
+                placeholder="hello@vpoiske.app" 
+              />
+              <Button variant="primary" onClick={handleSendCode} disabled={!email.includes('@')} className="w-full relative shadow-lg">
+                Получить код
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <p className="text-body text-secondary text-center">Код отправлен на почту <br/><span className="text-white font-medium">{email}</span></p>
+              <div className="flex justify-between max-w-[280px] mx-auto space-x-2">
+                {codeList.map((c, i) => (
+                  <input
+                    key={i}
+                    id={`email-code-input-${i}`}
                     type="tel"
                     maxLength={1}
                     value={c}

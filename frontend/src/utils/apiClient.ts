@@ -21,9 +21,8 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     // We would normally get the access token from the auth store, assuming we save it.
-    // For now, depending on the implementation we might need to retrieve it from local storage,
     // or through the zustand store directly if added.
-    const token = localStorage.getItem('vpoiske_access_token');
+    const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -1,14 +1,21 @@
 import React from 'react';
-import { Sparkles, ArrowLeft } from 'lucide-react';
+import { Sparkles, ArrowLeft, Trash2 } from 'lucide-react';
 
 export interface AgentHeaderProps {
   onBack?: () => void;
 }
 
 export const AgentHeader: React.FC<AgentHeaderProps> = ({ onBack }) => {
+  const handleReset = () => {
+    if (window.confirm("Вы уверены, что хотите сбросить кэш и выйти? Это удалит текущую сессию тестирования.")) {
+      localStorage.clear();
+      window.location.href = '/';
+    }
+  };
+
   return (
     <div 
-      className="flex items-center px-4 py-3 sticky top-0 z-50"
+      className="flex items-center px-4 py-3 sticky top-0 z-50 justify-between"
       style={{
         background: 'rgba(13, 31, 26, 0.75)',
         backdropFilter: 'var(--blur-nav)',
@@ -44,6 +51,14 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({ onBack }) => {
           Твой проводник
         </span>
       </div>
+      
+      <button 
+        onClick={handleReset}
+        className="ml-auto flex items-center justify-center p-2 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 active:bg-red-500/30 transition-colors"
+        title="Сбросить сессию и выйти"
+      >
+        <Trash2 size={16} />
+      </button>
     </div>
   );
 };
