@@ -7,7 +7,7 @@ const getBaseUrl = () => {
         return 'http://localhost:8000';
     }
     // If not on localhost, use the production/tunnel URL
-    return 'https://vpoiske-demo-api.loca.lt';
+    return 'https://vlubvi-api.loca.lt';
 };
 
 export const apiClient = axios.create({
